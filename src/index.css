@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Kalam:wght@700&family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+  font-family: 'Poppins', sans-serif;
+  color: #4b1c17;
+  background: #f7eae5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --red: #ad2517;
+  --masala: #8f2117;
+  --mustard: #dd9b3c;
+  --cream: #ecddd8;
+  --paper: #f7eae5;
+  --peach: #ecc5ba;
+  --ink: #4b1c17;
+  --green: #365b3b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--paper);
+}
+
+button,
+a {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+}
+
+::selection {
+  color: var(--cream);
+  background: var(--masala);
+}
+
+:focus-visible {
+  outline: 3px solid var(--mustard);
+  outline-offset: 3px;
+}
