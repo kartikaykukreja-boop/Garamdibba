@@ -27,7 +27,7 @@ import './App.css'
 
 // Add the 10-digit business number with country code (for example: 919876543210).
 // Until then, WhatsApp opens with the order message ready to share.
-const WHATSAPP_NUMBER = ''
+const WHATSAPP_NUMBER = '919690223377'
 
 const menu = {
   'Week 1': [
