@@ -50,7 +50,7 @@ const menu = {
 
 function whatsappHref(message = 'Hi Garam Dabba! I would like to order a lunch dabba. 🍱') {
   const number = WHATSAPP_NUMBER.replace(/\D/g, '')
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`
+  return `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(message)}`
 }
 
 function ScrollToTop() {
