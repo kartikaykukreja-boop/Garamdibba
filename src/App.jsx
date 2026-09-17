@@ -48,7 +48,7 @@ const menu = {
   ],
 }
 
-function whatsappHref(message = 'Hi Garam Dabba! I would like to order a lunch dabba. 🍱') {
+function whatsappHref(message = 'Hi Garam Dibba! I would like to order a lunch dibba. 🍱') {
   const number = WHATSAPP_NUMBER.replace(/\D/g, '')
   return `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(message)}`
 }
@@ -65,10 +65,10 @@ function ScrollToTop() {
 
 function BrandMark() {
   return (
-    <span className="brand-mark" aria-label="Garam Dabba">
+    <span className="brand-mark" aria-label="Garam Dibba">
       <span>Garam</span>
       <Utensils aria-hidden="true" />
-      <span>Dabba</span>
+      <span>Dibba</span>
     </span>
   )
 }
@@ -166,7 +166,7 @@ function HomePage() {
               See the menu
               <ArrowRight size={19} />
             </Link>
-            <OrderButton className="button-cream">Order a dabba</OrderButton>
+            <OrderButton className="button-cream">Order a dibba</OrderButton>
           </div>
           <div className="hero-meta" aria-label="Service highlights">
             <span><CalendarDays size={18} /> Monday–Saturday</span>
@@ -174,7 +174,7 @@ function HomePage() {
           </div>
         </div>
 
-        <div className="hero-art" aria-label="Illustrated Garam Dabba meals">
+        <div className="hero-art" aria-label="Illustrated Garam Dibba meals">
           <img src="/garam-dabba-art.png" alt="Hand-drawn Indian tiffin boxes filled with homestyle food" />
           <div className="hero-sticker">
             <span>Aaj ka lunch?</span>
@@ -183,30 +183,30 @@ function HomePage() {
         </div>
       </section>
 
-      <div className="marquee" aria-label="Garam Dabba qualities">
+      <div className="marquee" aria-label="Garam Dibba qualities">
         <div>
           <span>Ghar jaisa</span><b>✦</b><span>Full of flavour</span><b>✦</b>
-          <span>Everyday comfort</span><b>✦</b><span>Dabba kholke dekho</span><b>✦</b>
+          <span>Everyday comfort</span><b>✦</b><span>Dibba kholke dekho</span><b>✦</b>
         </div>
       </div>
 
       <section className="section shell home-intro">
         <div>
-          <Eyebrow>Why Garam Dabba</Eyebrow>
+          <Eyebrow>Why Garam Dibba</Eyebrow>
           <h2>Your everyday lunch, with actual personality.</h2>
         </div>
         <div className="intro-copy">
           <p>
-            Garam Dabba is built around that first happy moment of opening a hot tiffin:
+            Garam Dibba is built around that first happy moment of opening a hot tiffin:
             familiar food, a generous plate and the comfort of knowing lunch is handled.
           </p>
           <Link className="text-link" to="/about">
-            Meet Garam Dabba <ArrowRight size={18} />
+            Meet Garam Dibba <ArrowRight size={18} />
           </Link>
         </div>
       </section>
 
-      <section className="features shell" aria-label="What makes Garam Dabba special">
+      <section className="features shell" aria-label="What makes Garam Dibba special">
         <article className="feature-card feature-red">
           <div className="feature-icon"><Heart /></div>
           <span className="card-number">01</span>
@@ -216,7 +216,7 @@ function HomePage() {
         <article className="feature-card feature-mustard">
           <div className="feature-icon"><Package /></div>
           <span className="card-number">02</span>
-          <h3>A complete dabba</h3>
+          <h3>A complete dibba</h3>
           <p>Main dish, seasonal sabzi and thoughtful sides—all together, no overthinking.</p>
         </article>
         <article className="feature-card feature-cream">
@@ -231,7 +231,7 @@ function HomePage() {
         <div className="shell">
           <div className="section-heading heading-row">
             <div>
-              <Eyebrow>What’s in the dabba</Eyebrow>
+              <Eyebrow>What’s in the dibba</Eyebrow>
               <h2>A week full of favourites.</h2>
             </div>
             <Link className="button button-outline" to="/menu">
@@ -287,7 +287,7 @@ function AboutPage() {
         <div className="shell page-hero-grid">
           <div className="page-hero-copy">
             <Eyebrow light>Our story</Eyebrow>
-            <h1>A hot dabba. A homely feeling.</h1>
+            <h1>A hot dibba. A homely feeling.</h1>
             <p>
               We’re here to make everyday Indian lunch feel familiar, satisfying and full of care.
             </p>
@@ -305,7 +305,7 @@ function AboutPage() {
         </div>
         <div className="story-copy">
           <p className="story-lede">
-            Garam Dabba began with one simple idea: lunch should feel like opening a tiffin
+            Garam Dibba began with one simple idea: lunch should feel like opening a tiffin
             packed by someone who knows what you like.
           </p>
           <p>
@@ -345,10 +345,10 @@ function AboutPage() {
           <div className="promise-note">Made for real lunch breaks.</div>
         </div>
         <div className="promise-copy">
-          <Eyebrow>The Garam Dabba promise</Eyebrow>
+          <Eyebrow>The Garam Dibba promise</Eyebrow>
           <h2>Food first. Always.</h2>
           <p>
-            We want every part of Garam Dabba to carry the same feeling as the meal itself:
+            We want every part of Garam Dibba to carry the same feeling as the meal itself:
             warm, straightforward and unmistakably Indian.
           </p>
           <ul className="check-list">
@@ -434,9 +434,9 @@ function MenuPage() {
               </div>
               <OrderButton
                 className="menu-order-link"
-                message={`Hi Garam Dabba! I would like to order the ${item.day} ${activeWeek} lunch with ${item.main}. 🍱`}
+                message={`Hi Garam Dibba! I would like to order the ${item.day} ${activeWeek} lunch with ${item.main}. 🍱`}
               >
-                Order this dabba
+                Order this dibba
               </OrderButton>
             </article>
           ))}
@@ -452,14 +452,14 @@ function MenuPage() {
         <div className="shell">
           <div className="section-heading centered-heading">
             <Eyebrow>Lunch, sorted</Eyebrow>
-            <h2>From menu to dabba in three taps.</h2>
+            <h2>From menu to dibba in three taps.</h2>
           </div>
           <div className="how-grid">
             <article>
               <span>1</span>
               <CalendarDays />
               <h3>Pick your lunch</h3>
-              <p>Choose your day and the dabba that sounds good.</p>
+              <p>Choose your day and the dibba that sounds good.</p>
             </article>
             <ChevronRight className="how-arrow" />
             <article>
@@ -479,7 +479,7 @@ function MenuPage() {
         </div>
       </section>
 
-      <CallToAction title="Aaj ka dabba is calling." />
+      <CallToAction title="Aaj ka dibba is calling." />
     </main>
   )
 }
@@ -519,7 +519,7 @@ function SiteFooter() {
         </div>
       </div>
       <div className="shell footer-bottom">
-        <span>© {new Date().getFullYear()} Garam Dabba</span>
+        <span>© {new Date().getFullYear()} Garam Dibba</span>
         <span>Made with warmth, served with character. 🍱</span>
       </div>
     </footer>

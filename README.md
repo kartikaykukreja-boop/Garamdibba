@@ -1,6 +1,6 @@
-# Garam Dabba
+# Garam Dibba
 
-A warm, responsive customer website for Garam Dabba — homestyle Indian lunch,
+A warm, responsive customer website for Garam Dibba — homestyle Indian lunch,
 with a two-week menu and WhatsApp-first ordering.
 
 ## Pages
@@ -30,5 +30,5 @@ buttons open WhatsApp with a pre-filled message ready to share.
 
 ## Brand system
 
-The site uses Garam Red, Deep Masala, Dabba Mustard, Cream and Warm Peach, with
+The site uses Garam Red, Deep Masala, Dibba Mustard, Cream and Warm Peach, with
 Baloo 2, Poppins and Kalam typography.
