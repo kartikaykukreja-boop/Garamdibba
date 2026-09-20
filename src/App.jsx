@@ -48,6 +48,42 @@ const menu = {
   ],
 }
 
+const brandGallery = [
+  { src: '/gallery/dibba-branded-paneer-makhani.jpg', alt: 'Paneer makhani dibba with steamed rice, packed in a Garam Dibba box' },
+  { src: '/gallery/dibba-branded-chole.jpg', alt: 'Chole dibba with rice, pickled onion and ginger, packed in a Garam Dibba box' },
+  { src: '/gallery/dibba-branded-paneer-tikka-bowl.jpg', alt: 'Grilled paneer with sautéed mushroom and tomato sabzi dibba bowl' },
+  { src: '/gallery/dibba-branded-veg-mushroom-bowl.jpg', alt: 'Grilled paneer and mushroom veg dibba bowl, close up' },
+]
+
+const dishGallery = [
+  { src: '/gallery/dibba-rajma-chawal.jpg', alt: 'Rajma chawal thali with pickled onion and green chutney' },
+  { src: '/gallery/dibba-chole-bhature.jpg', alt: 'Chole bhature with fluffy fried bhature' },
+  { src: '/gallery/dibba-aloo-paratha.jpg', alt: 'Buttery aloo paratha served with fresh curd and paneer cubes' },
+  { src: '/gallery/dibba-poha.jpg', alt: 'Poha with peanuts, onion and coriander' },
+  { src: '/gallery/dibba-idli-vada-sambar.jpg', alt: 'Idli and vada with hot sambar and coconut chutney' },
+  { src: '/gallery/dibba-vada-pav.jpg', alt: 'Mumbai-style vada pav with spiced potato filling' },
+  { src: '/gallery/dibba-vada-pav-chutney.jpg', alt: 'Vada pav with green chutney, dry garlic chutney and pickled onion' },
+  { src: '/gallery/dibba-fried-rice-manchurian.jpg', alt: 'Spiced fried rice with vegetable manchurian gravy' },
+]
+
+function PhotoGallery({ eyebrow, title, photos, className = '' }) {
+  return (
+    <section className={`section shell gallery-section ${className}`.trim()}>
+      <div className="section-heading centered-heading">
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <h2>{title}</h2>
+      </div>
+      <div className="gallery-grid">
+        {photos.map((photo) => (
+          <figure className="gallery-item" key={photo.src}>
+            <img src={photo.src} alt={photo.alt} loading="lazy" />
+          </figure>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function whatsappHref(message = 'Hi Garam Dibba! I would like to order a lunch dibba. 🍱') {
   const number = WHATSAPP_NUMBER.replace(/\D/g, '')
   return `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(message)}`
@@ -252,6 +288,13 @@ function HomePage() {
         </div>
       </section>
 
+      <PhotoGallery
+        eyebrow="Seen fresh from the kitchen"
+        title="Real dibbas, packed and ready."
+        photos={brandGallery}
+        className="gallery-brand"
+      />
+
       <CallToAction />
     </main>
   )
@@ -447,6 +490,13 @@ function MenuPage() {
           <p><strong>A small seasonal note</strong> Seasonal vegetables may change based on freshness and availability.</p>
         </div>
       </section>
+
+      <PhotoGallery
+        eyebrow="A peek inside the dibba"
+        title="Every dish, plated the way it lands with you."
+        photos={dishGallery}
+        className="gallery-dishes"
+      />
 
       <section className="how-section">
         <div className="shell">
