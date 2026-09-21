@@ -210,8 +210,8 @@ function HomePage() {
           </div>
         </div>
 
-        <div className="hero-art" aria-label="Illustrated Garam Dibba meals">
-          <img src="/garam-dabba-art.png" alt="Hand-drawn Indian tiffin boxes filled with homestyle food" />
+        <div className="hero-art" aria-label="Garam Dibba meal bowl">
+          <img src="/hero-bowl.png" alt="Garam Dibba grilled paneer bowl with rice, sautéed mushrooms and roasted red pepper chutney" />
           <div className="hero-sticker">
             <span>Aaj ka lunch?</span>
             <strong>Sorted.</strong>
