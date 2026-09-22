@@ -553,7 +553,7 @@ function ContactPage() {
             </p>
           </div>
           <div className="about-hero-art">
-            <img src="/hero-bowl.png" alt="Garam Dibba grilled paneer bowl with rice, sautéed mushrooms and roasted red pepper chutney" />
+            <img src="/gallery/dibba-branded-paneer-tikka-bowl.jpg" alt="Grilled paneer with sautéed mushroom and tomato sabzi dibba bowl" />
           </div>
         </div>
       </section>
