@@ -8,9 +8,11 @@ import {
   Flame,
   Heart,
   Leaf,
+  Mail,
   Menu as MenuIcon,
   MessageCircle,
   Package,
+  Phone,
   Sparkles,
   Utensils,
   X,
@@ -28,6 +30,8 @@ import './App.css'
 // Add the 10-digit business number with country code (for example: 919876543210).
 // Until then, WhatsApp opens with the order message ready to share.
 const WHATSAPP_NUMBER = '919690223377'
+const CONTACT_PHONE_DISPLAY = '+91 96902 23377'
+const CONTACT_EMAIL = 'udaikukreja@garamdibba.com'
 
 const menu = {
   'Week 1': [
@@ -115,6 +119,7 @@ function SiteHeader() {
     { to: '/', label: 'Home', end: true },
     { to: '/about', label: 'Our story' },
     { to: '/menu', label: 'Lunch menu' },
+    { to: '/contact', label: 'Contact' },
   ]
 
   return (
@@ -534,6 +539,70 @@ function MenuPage() {
   )
 }
 
+function ContactPage() {
+  return (
+    <main>
+      <section className="page-hero">
+        <div className="shell page-hero-grid">
+          <div className="page-hero-copy">
+            <Eyebrow light>Get in touch</Eyebrow>
+            <h1>Let’s sort your lunch.</h1>
+            <p>
+              Message us on WhatsApp, give us a call or drop an email—whatever’s easiest.
+              We’re around Monday to Saturday to help you get a dibba sorted.
+            </p>
+          </div>
+          <div className="about-hero-art">
+            <img src="/hero-bowl.png" alt="Garam Dibba grilled paneer bowl with rice, sautéed mushrooms and roasted red pepper chutney" />
+          </div>
+        </div>
+      </section>
+
+      <section className="section shell promise-grid">
+        <div className="promise-art">
+          <img src="/whatsapp-qr.jpeg" alt="QR code to start a WhatsApp chat with Garam Dibba" />
+          <div className="promise-note">Scan to WhatsApp</div>
+        </div>
+        <div className="promise-copy">
+          <Eyebrow>Reach us directly</Eyebrow>
+          <h2>Three easy ways to say hi.</h2>
+          <ul className="check-list">
+            <li>
+              <MessageCircle />
+              <span>
+                <strong>WhatsApp</strong> — scan the QR code or tap the button below to chat with us directly.
+              </span>
+            </li>
+            <li>
+              <Phone />
+              <span>
+                <strong>Call or WhatsApp</strong> —{' '}
+                <a className="text-link" href={`tel:+${WHATSAPP_NUMBER}`}>{CONTACT_PHONE_DISPLAY}</a>
+              </span>
+            </li>
+            <li>
+              <Mail />
+              <span>
+                <strong>Email</strong> —{' '}
+                <a className="text-link" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+              </span>
+            </li>
+            <li>
+              <CalendarDays />
+              <span>
+                <strong>Hours</strong> — Monday to Saturday, fresh lunch every day.
+              </span>
+            </li>
+          </ul>
+          <OrderButton className="button-cream">Chat on WhatsApp</OrderButton>
+        </div>
+      </section>
+
+      <CallToAction title="Aaj ka lunch, sort kar lete hain?" />
+    </main>
+  )
+}
+
 function CallToAction({ title = 'Ready for a proper lunch?' }) {
   return (
     <section className="cta-section">
@@ -561,10 +630,13 @@ function SiteFooter() {
           <p>Explore</p>
           <Link to="/about">Our story</Link>
           <Link to="/menu">Lunch menu</Link>
+          <Link to="/contact">Contact</Link>
         </div>
         <div className="footer-links">
           <p>Hungry?</p>
           <a href={whatsappHref()} target="_blank" rel="noreferrer">Order on WhatsApp</a>
+          <a href={`tel:+${WHATSAPP_NUMBER}`}>{CONTACT_PHONE_DISPLAY}</a>
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
           <span>Monday–Saturday</span>
         </div>
       </div>
@@ -600,6 +672,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/menu" element={<MenuPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="*" element={<HomePage />} />
       </Routes>
       <SiteFooter />
