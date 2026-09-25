@@ -1,13 +1,20 @@
 # Garam Dibba
 
-A warm, responsive customer website for Garam Dibba — homestyle Indian lunch,
-with a two-week menu and WhatsApp-first ordering.
+A warm, responsive website for Garam Dibba — a vegetarian tiffin service in
+Dehradun with eight protein bowls, a two-week North Indian lunch menu, flexible
+meal plans and WhatsApp-first ordering.
+
+Built with Next.js (App Router). Every page is pre-rendered to static HTML, and
+all photos go through `next/image` (resized, served as AVIF/WebP, blur placeholders).
 
 ## Pages
 
-- Home: brand introduction and menu preview
-- Our Story: the brand idea, values and promise
-- Lunch Menu: interactive Week 1 / Week 2 menu with dish-specific order links
+- `/` Home: Dehradun intro, protein bowls, meal plans, the person behind Garam Dibba
+- `/tiffin-service-dehradun`: main local SEO page with FAQs
+- `/menu`: protein bowls and the Week 1 / Week 2 North Indian menu
+- `/meal-plans`: prices and daily / weekly / monthly plans
+- `/tiffin-delivery-dehradun`, `/vegetarian-tiffin-dehradun`, `/healthy-tiffin-dehradun`
+- `/about`, `/contact`
 
 ## Run locally
 
@@ -20,13 +27,16 @@ npm run dev
 
 ```bash
 npm run build
+npm run start
 ```
 
-## WhatsApp setup
+## Content
 
-Set `WHATSAPP_NUMBER` near the top of `src/App.jsx` to the business number with
-country code and no spaces (for example, `919876543210`). Until it is set, the
-buttons open WhatsApp with a pre-filled message ready to share.
+Contact details, bowls, plans, FAQs, delivery areas and per-page titles and
+descriptions live in `src/siteData.js`. Add verified delivery areas to
+`DELIVERY_AREAS` to list them on the Dehradun and Delivery pages.
+
+Bowl photos are in `public/bowls/` and are registered in `src/images.js`.
 
 ## Brand system
 
