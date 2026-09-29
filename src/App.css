@@ -1621,6 +1621,38 @@ h3 {
   padding: 20px 22px 22px;
 }
 
+.protein-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 68px;
+  height: 68px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--masala);
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--cream);
+  box-shadow: 3px 3px 0 var(--mustard);
+  line-height: 1;
+  transform: rotate(6deg);
+}
+
+.protein-badge strong {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.protein-badge small {
+  margin-top: 1px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 .bowl-card h3 {
   margin: 8px 0 10px;
   font-size: 1.55rem;
@@ -2848,6 +2880,22 @@ h3 {
     left: 8px;
     padding: 5px 8px;
     font-size: 0.52rem;
+  }
+
+  .protein-badge {
+    bottom: 8px;
+    right: 8px;
+    width: 50px;
+    height: 50px;
+    box-shadow: 2px 2px 0 var(--mustard);
+  }
+
+  .protein-badge strong {
+    font-size: 1rem;
+  }
+
+  .protein-badge small {
+    font-size: 0.48rem;
   }
 
   .bowl-card-body {

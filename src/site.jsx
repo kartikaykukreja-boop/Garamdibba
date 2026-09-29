@@ -140,6 +140,12 @@ export function BowlCards() {
               sizes="(max-width: 760px) 40vw, (max-width: 980px) 50vw, 290px"
             />
             <span className="bowl-style">{bowl.style}</span>
+            {bowl.protein && (
+              <span className="protein-badge">
+                <strong>{bowl.protein}g</strong>
+                <small>Protein</small>
+              </span>
+            )}
           </figure>
           <div className="bowl-card-body">
             <span className="menu-index">0{index + 1}</span>
