@@ -158,9 +158,9 @@ export function BowlCards() {
   )
 }
 
-export function HeroMosaic() {
+export function HeroMosaic({ className = '' }) {
   return (
-    <div className="hero-mosaic" aria-hidden="true">
+    <div className={`hero-mosaic ${className}`.trim()} aria-hidden="true">
       {bowls.slice(3, 7).map((bowl, index) => (
         <Image
           src={bowlImages[bowl.slug]}
