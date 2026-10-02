@@ -37,7 +37,7 @@ export default function AboutPage() {
         eyebrow="Our story"
         title="Made with care. Served with love."
         image={photos.founderWide}
-        alt="The founder of Garam Dibba smiling at a café counter in a pink block-print saree"
+        alt="The founder of Garam Dibba smiling with a cup of tea against a brick wall"
       >
         <p>
           Garam Dibba began with a mother wondering what her children would eat away from home, and grew

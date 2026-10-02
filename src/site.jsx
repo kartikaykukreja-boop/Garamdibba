@@ -266,7 +266,7 @@ export function FounderSection({ full = false }) {
         <div className="founder-photo">
           <Image
             src={photos.founder}
-            alt="The founder of Garam Dibba smiling at a café counter in a pink block-print saree"
+            alt="The founder of Garam Dibba smiling with a cup of tea against a brick wall"
             placeholder="blur"
             quality={85}
             sizes="(max-width: 760px) 100vw, 480px"
