@@ -1,11 +1,11 @@
 // Static imports let next/image read each photo's dimensions at build time,
 // generate blur placeholders and serve resized AVIF/WebP versions.
-import tangyTomato from '../public/bowls/tangy-tomato.jpg'
+import hotAndSourPaneer from '../public/bowls/hot-and-sour-paneer.jpg'
 import tandooriMalaiPaneer from '../public/bowls/tandoori-malai-paneer.jpg'
 import pindiChole from '../public/bowls/pindi-chole.jpg'
 import paneerLababdar from '../public/bowls/paneer-lababdar.jpg'
 import texMex from '../public/bowls/tex-mex.jpg'
-import periPeriPaneer from '../public/bowls/peri-peri-paneer.jpg'
+import paneerPasanda from '../public/bowls/paneer-pasanda.jpg'
 import pestoPaneer from '../public/bowls/pesto-paneer.jpg'
 import koreanPaneer from '../public/bowls/korean-paneer.jpg'
 import heroBowl from '../public/hero-bowl.png'
@@ -23,12 +23,12 @@ import vadaPavChutney from '../public/gallery/dibba-vada-pav-chutney.jpg'
 import friedRiceManchurian from '../public/gallery/dibba-fried-rice-manchurian.jpg'
 
 export const bowlImages = {
-  'tangy-tomato': tangyTomato,
+  'hot-and-sour-paneer': hotAndSourPaneer,
   'tandoori-malai-paneer': tandooriMalaiPaneer,
   'pindi-chole': pindiChole,
   'paneer-lababdar': paneerLababdar,
   'tex-mex': texMex,
-  'peri-peri-paneer': periPeriPaneer,
+  'paneer-pasanda': paneerPasanda,
   'pesto-paneer': pestoPaneer,
   'korean-paneer': koreanPaneer,
 }

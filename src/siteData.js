@@ -26,14 +26,21 @@ export const plans = [
   { id: '4-week', name: '4-Week Plan', short: '4-Week', price: 110, note: 'A longer-term tiffin routine.', best: true },
 ]
 
+export const proteinBowlPlans = [
+  { id: 'bowl-1-day', name: '1-Day Plan', short: '1 Day', price: 180, boxes: 1, total: 180, note: 'One protein bowl.' },
+  { id: 'bowl-3-day', name: '3-Day Plan', short: '3 Days', price: 160, boxes: 3, total: 480, note: 'Three bowls across three delivery days.' },
+  { id: 'bowl-1-week', name: '1-Week Plan', short: '1 Week', price: 145, boxes: 6, total: 870, note: 'Six bowls, Monday to Saturday.' },
+  { id: 'bowl-2-week', name: '2-Week Plan', short: '2 Weeks', price: 130, boxes: 12, total: 1560, note: 'Twelve bowls across two weeks.', best: true },
+]
+
 export const bowls = [
   {
-    slug: 'tangy-tomato',
-    name: 'Tangy Tomato',
-    style: 'Indian favourite',
+    slug: 'hot-and-sour-paneer',
+    name: 'Hot & Sour Paneer Bowl',
+    style: 'Modern flavours',
     protein: 26,
-    blurb: 'Grilled paneer with sautéed mushrooms and a bright, tangy tomato and pepper sauce.',
-    alt: 'Tangy Tomato bowl with grilled paneer strips, sautéed mushrooms, tomato and pepper sauce and rice',
+    blurb: 'Paneer and vegetables in a bold hot-and-sour sauce, served with rice and spring onion.',
+    alt: 'Hot and Sour Paneer Bowl with paneer, vegetables, rice and spring onion',
   },
   {
     slug: 'tandoori-malai-paneer',
@@ -68,12 +75,12 @@ export const bowls = [
     alt: 'Tex-Mex bowl with spiced paneer, peppers, black beans, corn and a creamy drizzle beside rice',
   },
   {
-    slug: 'peri-peri-paneer',
-    name: 'Peri-Peri Paneer Bowl',
-    style: 'Modern flavours',
+    slug: 'paneer-pasanda',
+    name: 'Paneer Pasanda Bowl',
+    style: 'Indian favourite',
     protein: 26,
-    blurb: 'Paneer tossed in a fiery peri-peri glaze over a bed of rice.',
-    alt: 'Peri-Peri Paneer bowl with glazed paneer cubes over rice',
+    blurb: 'Paneer in a rich, creamy onion-tomato gravy, served with fragrant rice and pickled onion.',
+    alt: 'Paneer Pasanda Bowl with paneer in creamy gravy, rice and pickled onion',
   },
   {
     slug: 'pesto-paneer',
@@ -92,6 +99,15 @@ export const bowls = [
     alt: 'Korean Paneer bowl with glossy paneer, peppers, red onion, sesame and spring onion beside rice',
   },
 ].map((bowl) => ({ ...bowl, image: `/bowls/${bowl.slug}.jpg` }))
+
+export const proteinBowlRotation = [
+  { day: 'Monday', bowl: 'Hot & Sour Paneer Bowl' },
+  { day: 'Tuesday', bowl: 'Pindi Chole' },
+  { day: 'Wednesday', bowl: 'Paneer Pasanda Bowl' },
+  { day: 'Thursday', bowl: 'Tex-Mex Bowl' },
+  { day: 'Friday', bowl: 'Pesto Paneer Bowl' },
+  { day: 'Saturday', bowl: 'Paneer Lababdar' },
+]
 
 export const bowlNames = bowls.map((bowl) => bowl.name)
 
@@ -129,7 +145,7 @@ export const dehradunFaqs = [
   },
   {
     q: 'How much does Garam Dibba cost?',
-    a: 'Current plans range from ₹110 per box on the 4-Week Plan to ₹180 per box on the 1-Day Plan.',
+    a: 'Protein bowl plans run from ₹130 to ₹180 per box. The separate North Indian lunch plans run from ₹110 to ₹180 per box.',
   },
   {
     q: 'Do you offer daily tiffin?',
@@ -201,12 +217,12 @@ export const pageMeta = {
   '/menu': {
     title: 'Vegetarian Tiffin Menu in Dehradun | Garam Dibba',
     description:
-      'Explore the Garam Dibba vegetarian tiffin menu in Dehradun: eight protein bowls from Paneer Lababdar to Korean Paneer, plus a two-week North Indian lunch menu.',
+      'Explore eight vegetarian protein bowls, a Monday-to-Saturday bowl rotation and a separate two-week North Indian lunch menu in Dehradun.',
   },
   '/meal-plans': {
     title: 'Tiffin Plans & Prices in Dehradun | Garam Dibba',
     description:
-      'Daily, weekly and monthly vegetarian tiffin plans in Dehradun from ₹110 per box. Choose a 1-Day, 3-Day, 1-Week, 2-Week or 4-Week plan with delivery Monday to Saturday.',
+      'Compare separate protein bowl and North Indian lunch plans in Dehradun, with delivery Monday to Saturday and protein bowl plans from ₹130 per box.',
   },
   '/tiffin-delivery-dehradun': {
     title: 'Tiffin Delivery in Dehradun | Garam Dibba',

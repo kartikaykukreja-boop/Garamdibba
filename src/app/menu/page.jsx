@@ -10,6 +10,7 @@ import {
   HeroMosaic,
   HowSteps,
   PageHero,
+  ProteinBowlProgram,
 } from '../../site.jsx'
 import { bowlImages, photos } from '../../images.js'
 import { buildMetadata } from '../../metadata.js'
@@ -88,6 +89,7 @@ export default function MenuPage() {
             packed hot in a Garam Dibba bowl.
           </p>
           <BowlCards />
+          <ProteinBowlProgram />
           <a className="menu-next" href="#north-indian">
             <span>
               <small>Menu 2 of 2</small>
@@ -140,8 +142,8 @@ export default function MenuPage() {
             profiles and a modern take on everyday tiffin, plus a two-week North Indian lunch menu.
           </p>
           <p>
-            From comforting Indian favourites like Paneer Lababdar and Pindi Chole to contemporary
-            options such as Tex-Mex Bowl, Pesto Paneer Bowl and Korean Paneer Bowl, Garam Dibba gives
+            From comforting Indian favourites like Paneer Pasanda, Paneer Lababdar and Pindi Chole to
+            contemporary options such as Hot & Sour Paneer, Tex-Mex, Pesto and Korean Paneer, Garam Dibba gives
             you more ways to keep your everyday meals interesting.
           </p>
           <p>

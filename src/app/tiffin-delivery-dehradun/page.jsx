@@ -16,7 +16,7 @@ export const metadata = buildMetadata('/tiffin-delivery-dehradun')
 
 const steps = [
   { icon: Utensils, title: 'Explore the Menu', text: 'Choose from the current Garam Dibba vegetarian meals.' },
-  { icon: ClipboardList, title: 'Select Your Plan', text: 'Choose a 1-Day, 3-Day, 1-Week, 2-Week or 4-Week plan.' },
+  { icon: ClipboardList, title: 'Select Your Plan', text: 'Choose from the separate protein bowl or North Indian lunch plans.' },
   { icon: MessageCircle, title: 'Place Your Order', text: 'Send your order on WhatsApp or give us a call.' },
   { icon: Truck, title: 'Receive Your Meal', text: 'Your meal is delivered according to the current delivery schedule.' },
 ]
@@ -64,7 +64,7 @@ export default function DeliveryPage() {
           <CalendarDays aria-hidden="true" />
           <h2>Delivery Schedule</h2>
           <p className="info-big">Monday–Saturday</p>
-          <p>Fresh meals on every delivery day, whether you’re on a 1-Day box or a 4-Week plan.</p>
+          <p>Fresh meals on every delivery day, whether you choose a protein bowl or North Indian lunch plan.</p>
         </article>
         <article className="info-card">
           <MapPin aria-hidden="true" />

@@ -1666,6 +1666,156 @@ h3 {
   line-height: 1.65;
 }
 
+/* ---------- Protein bowl weekly program ---------- */
+
+.protein-program {
+  margin-top: 72px;
+}
+
+.protein-program-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 26px;
+}
+
+.protein-program-heading h3,
+.custom-weekly-menu h3,
+.protein-plan-block h3 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.protein-program-heading p,
+.custom-weekly-menu p {
+  max-width: 650px;
+  margin: 8px 0 0;
+  color: rgba(75, 28, 23, 0.74);
+  line-height: 1.7;
+}
+
+.rotation-badge {
+  flex: 0 0 auto;
+  padding: 9px 14px;
+  border: 1px solid var(--masala);
+  border-radius: 999px;
+  color: var(--cream);
+  background: var(--red);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rotation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rotation-grid li {
+  position: relative;
+  min-height: 142px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  padding: 22px;
+  border: 1px solid rgba(143, 33, 23, 0.42);
+  border-radius: 18px 24px 16px 21px;
+  background: var(--cream);
+}
+
+.rotation-grid li:nth-child(even) {
+  border-radius: 24px 16px 22px 18px;
+}
+
+.rotation-number {
+  position: absolute;
+  top: 7px;
+  right: 14px;
+  color: rgba(173, 37, 23, 0.12);
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 3.7rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.rotation-day {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 4px;
+  color: var(--red);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.rotation-grid strong {
+  position: relative;
+  z-index: 1;
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 1.35rem;
+  line-height: 1.12;
+}
+
+.custom-weekly-menu {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 45px;
+  align-items: center;
+  margin-top: 22px;
+  padding: 38px;
+  border: 1px solid var(--masala);
+  border-radius: 24px 70px 22px 24px;
+  background: var(--mustard);
+  box-shadow: 7px 8px 0 var(--masala);
+}
+
+.custom-weekly-menu .menu-number {
+  margin-bottom: 16px;
+}
+
+.custom-bowl-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.custom-bowl-list li {
+  padding: 7px 11px;
+  border: 1px solid rgba(143, 33, 23, 0.38);
+  border-radius: 999px;
+  background: rgba(247, 234, 229, 0.72);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.custom-menu-actions .button {
+  width: fit-content;
+}
+
+.protein-plan-block {
+  margin-top: 75px;
+  padding-top: 70px;
+  border-top: 1px solid rgba(143, 33, 23, 0.34);
+}
+
+.protein-plan-block .section-heading {
+  margin-bottom: 42px;
+}
+
+.protein-plans-page > .protein-program {
+  margin-top: 44px;
+}
+
 /* ---------- Menu page: menu chooser & switch bar ---------- */
 
 .menu-choice {
@@ -1959,6 +2109,10 @@ h3 {
   gap: 14px;
 }
 
+.plan-grid-four {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 .plan-card {
   position: relative;
   display: flex;
@@ -2017,6 +2171,22 @@ h3 {
   color: rgba(75, 28, 23, 0.72);
   font-size: 0.78rem;
   line-height: 1.6;
+}
+
+.plan-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 9px 0;
+  border-top: 1px solid rgba(143, 33, 23, 0.22);
+  border-bottom: 1px solid rgba(143, 33, 23, 0.22);
+  color: rgba(75, 28, 23, 0.7);
+  font-size: 0.7rem;
+}
+
+.plan-total strong {
+  color: var(--ink);
 }
 
 .plan-badge {
@@ -2495,6 +2665,19 @@ h3 {
     row-gap: 28px;
   }
 
+  .plan-grid-four {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .rotation-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .custom-weekly-menu {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
   .reason-grid,
   .faq-section,
   .north-head {
@@ -2911,6 +3094,39 @@ h3 {
     font-size: 0.76rem;
   }
 
+  .protein-program {
+    margin-top: 55px;
+  }
+
+  .protein-program-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .rotation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rotation-grid li {
+    min-height: 112px;
+    padding: 18px;
+  }
+
+  .custom-weekly-menu {
+    padding: 26px 20px;
+    border-radius: 20px 45px 18px 20px;
+  }
+
+  .custom-menu-actions .button {
+    width: 100%;
+  }
+
+  .protein-plan-block {
+    margin-top: 58px;
+    padding-top: 55px;
+  }
+
   .menu-hero-mosaic {
     display: none;
   }
@@ -2976,6 +3192,10 @@ h3 {
 
   .plan-card.is-best {
     grid-column: 1 / -1;
+  }
+
+  .plan-grid-four .plan-card.is-best {
+    grid-column: auto;
   }
 
   .plan-price span {

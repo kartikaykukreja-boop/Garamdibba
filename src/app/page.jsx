@@ -80,8 +80,8 @@ export default function HomePage() {
             Garam Dibba gives you a simple way to plan your food.
           </p>
           <p>
-            Our current menu includes eight vegetarian protein bowls, from Tandoori Malai Paneer and
-            Paneer Lababdar to Pindi Chole, Tex-Mex, Pesto, Peri-Peri and Korean Paneer options,
+            Our current menu includes eight vegetarian protein bowls, from Hot & Sour Paneer and
+            Paneer Pasanda to Paneer Lababdar, Pindi Chole, Tex-Mex, Pesto and Korean Paneer options,
             alongside a two-week North Indian lunch menu.
           </p>
           <p>Choose a single box or a longer meal plan depending on your routine.</p>

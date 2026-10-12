@@ -97,14 +97,14 @@ export default function DehradunPage() {
             </article>
             <article className="reason-card">
               <ClipboardList aria-hidden="true" />
-              <h3>Flexible meal plans</h3>
-              <p>Choose the plan that matches your routine:</p>
+              <h3>North Indian lunch plans</h3>
+              <p>Choose the homestyle lunch plan that matches your routine:</p>
               <ul className="price-list">
                 {plans.map((plan) => (
                   <li key={plan.id}><span>{plan.short}</span><strong>₹{plan.price}/box</strong></li>
                 ))}
               </ul>
-              <p>Delivery is available Monday to Saturday.</p>
+              <p>Delivery is available Monday to Saturday. Protein bowls have a separate set of plans.</p>
             </article>
             <article className="reason-card">
               <Clock3 aria-hidden="true" />
@@ -215,9 +215,9 @@ export default function DehradunPage() {
       </section>
 
       <PlansSection
-        eyebrow="Choose your meal plan"
-        title="Ready to make everyday meals easier?"
-        intro="Explore the Garam Dibba plans and choose the option that fits your schedule."
+        eyebrow="North Indian lunch plans"
+        title="Homestyle Lunch Plans for Your Routine"
+        intro="These prices apply to the North Indian lunch menu. See the meal-plans page for the separate protein bowl options."
       />
 
       <FaqSection faqs={dehradunFaqs} />

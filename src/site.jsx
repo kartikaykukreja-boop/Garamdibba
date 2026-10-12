@@ -19,6 +19,8 @@ import {
   bowls,
   northIndianMenu,
   plans,
+  proteinBowlPlans,
+  proteinBowlRotation,
   whatsappHref,
 } from './siteData.js'
 import { bowlImages, photos } from './images.js'
@@ -181,10 +183,10 @@ export function HeroMosaic({ className = '' }) {
   )
 }
 
-export function PlanGrid() {
+export function PlanGrid({ items = plans, menuName = 'North Indian lunch' }) {
   return (
-    <div className="plan-grid">
-      {plans.map((plan) => (
+    <div className={items.length === 4 ? 'plan-grid plan-grid-four' : 'plan-grid'}>
+      {items.map((plan) => (
         <article className={plan.best ? 'plan-card is-best' : 'plan-card'} key={plan.id}>
           {plan.best && <span className="plan-badge">Lowest per-box price</span>}
           <h3>{plan.name}</h3>
@@ -192,10 +194,16 @@ export function PlanGrid() {
             <span>₹{plan.price}</span>
             <small>/box</small>
           </p>
+          {plan.boxes && (
+            <p className="plan-total">
+              <span>{plan.boxes} {plan.boxes === 1 ? 'box' : 'boxes'}</span>
+              <strong>₹{plan.total.toLocaleString('en-IN')} total</strong>
+            </p>
+          )}
           <p className="plan-note">{plan.note}</p>
           <OrderButton
             className="menu-order-link"
-            message={`Hi Garam Dibba! I would like to start the ${plan.name} (₹${plan.price}/box). 🍱`}
+            message={`Hi Garam Dibba! I would like to start the ${plan.name} for ${menuName} (₹${plan.price}/box${plan.total ? `, ₹${plan.total.toLocaleString('en-IN')} total` : ''}). 🍱`}
           >
             Choose plan
           </OrderButton>
@@ -205,10 +213,68 @@ export function PlanGrid() {
   )
 }
 
+export function ProteinBowlProgram({ showPlans = true }) {
+  return (
+    <div className="protein-program">
+      <div className="protein-program-heading">
+        <div>
+          <Eyebrow>Your week, sorted</Eyebrow>
+          <h3>6-Bowl Weekly Rotation</h3>
+          <p>One bowl each day from Monday to Saturday. Sunday is off.</p>
+        </div>
+        <span className="rotation-badge">26–30g protein</span>
+      </div>
+
+      <ol className="rotation-grid">
+        {proteinBowlRotation.map(({ day, bowl }, index) => (
+          <li key={day}>
+            <span className="rotation-day">{day}</span>
+            <span className="rotation-number">0{index + 1}</span>
+            <strong>{bowl}</strong>
+          </li>
+        ))}
+      </ol>
+
+      <div className="custom-weekly-menu">
+        <div>
+          <span className="menu-number">Make it yours</span>
+          <h3>Build Your Own Weekly Menu</h3>
+          <p>Choose any six bowls from our full eight-bowl menu for your Monday–Saturday plan.</p>
+        </div>
+        <div className="custom-menu-actions">
+          <ul className="custom-bowl-list" aria-label="Eight bowls available for a custom weekly menu">
+            {bowls.map((bowl) => <li key={bowl.slug}>{bowl.name}</li>)}
+          </ul>
+          <OrderButton message="Hi Garam Dibba! I would like to build my own 6-bowl weekly protein bowl menu. 🍱">
+            Build my weekly menu
+          </OrderButton>
+        </div>
+      </div>
+
+      {showPlans && (
+        <div className="protein-plan-block plans-light">
+          <div className="section-heading centered-heading">
+            <Eyebrow>Protein bowl plans</Eyebrow>
+            <h3>Choose Your Protein Bowl Plan</h3>
+            <p className="section-sub">These prices apply to protein bowls and are separate from the North Indian lunch plans.</p>
+          </div>
+          <PlanGrid items={proteinBowlPlans} menuName="protein bowls" />
+          <div className="plans-foot">
+            <p>
+              <CalendarDays size={18} aria-hidden="true" />
+              <span><strong>Delivery: Monday–Saturday.</strong> The 1-week plan includes six bowls, with Sunday off.</span>
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function PlansSection({
-  eyebrow = 'Meal plans & prices',
-  title = 'Tiffin Plans That Fit Your Routine',
-  intro = 'Whether you’re trying Garam Dibba for a day or planning your meals for the next month, choose the plan that works for you.',
+  eyebrow = 'North Indian lunch plans',
+  title = 'Homestyle Lunch Plans That Fit Your Routine',
+  intro = 'These plans apply to the North Indian lunch menu. Protein bowl plans are priced separately.',
   showLink = true,
 }) {
   return (
@@ -339,7 +405,7 @@ export function HowSteps({ title = 'From menu to dibba in three taps.', eyebrow 
             <span>2</span>
             <CalendarDays />
             <h3>Choose your plan</h3>
-            <p>From a single 1-Day box to a 4-Week plan, Monday to Saturday.</p>
+            <p>Choose a separate protein bowl or North Indian lunch plan, Monday to Saturday.</p>
           </article>
           <ChevronRight className="how-arrow" />
           <article>
