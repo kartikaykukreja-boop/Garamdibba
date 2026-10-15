@@ -79,8 +79,8 @@ export default function MealPlansPage() {
             <p>With delivery Monday to Saturday, Garam Dibba is built around making everyday meals easier to manage.</p>
             <ul className="check-list">
               <li><Repeat /> Daily tiffin: the 1-Day Plan at ₹180/box</li>
-              <li><CalendarDays /> Weekly tiffin: the 1-Week Plan at ₹130/box</li>
-              <li><Package /> Monthly tiffin: the 4-Week Plan at ₹110/box</li>
+              <li><CalendarDays /> Weekly tiffin: the 1-Week Plan at ₹135/box</li>
+              <li><Package /> Monthly tiffin: the 4-Week Plan at ₹120/box</li>
             </ul>
             <a className="text-link" href="#plans">View All Plans <ArrowRight size={18} /></a>
           </div>

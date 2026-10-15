@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { ArrowDown, ArrowRight } from 'lucide-react'
+import { ArrowDown, ArrowRight, CalendarDays } from 'lucide-react'
 import MenuSwitchBar from '../../MenuSwitchBar.jsx'
 import NorthIndianWeeks from '../../NorthIndianWeeks.jsx'
 import {
@@ -10,9 +10,11 @@ import {
   HeroMosaic,
   HowSteps,
   PageHero,
+  PlanGrid,
   ProteinBowlProgram,
 } from '../../site.jsx'
 import { bowlImages, photos } from '../../images.js'
+import { plans } from '../../siteData.js'
 import { buildMetadata } from '../../metadata.js'
 
 export const metadata = buildMetadata('/menu')
@@ -127,6 +129,21 @@ export default function MenuPage() {
             </div>
 
             <NorthIndianWeeks />
+
+            <div className="protein-plan-block plans-light">
+              <div className="section-heading centered-heading">
+                <Eyebrow>North Indian lunch plans</Eyebrow>
+                <h3>Choose Your North Indian Lunch Plan</h3>
+                <p className="section-sub">These prices apply to the North Indian lunch menu and are separate from the protein bowl plans.</p>
+              </div>
+              <PlanGrid items={plans} menuName="North Indian lunch" />
+              <div className="plans-foot">
+                <p>
+                  <CalendarDays size={18} aria-hidden="true" />
+                  <span><strong>Delivery: Monday–Saturday.</strong> The 1-week plan includes six boxes, with Sunday off.</span>
+                </p>
+              </div>
+            </div>
           </div>
         </section>
       </div>

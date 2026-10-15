@@ -28,13 +28,12 @@ export default function ContactPage() {
       </PageHero>
 
       <section className="section shell promise-grid">
-        <div className="promise-art">
+        <div className="promise-art qr-art">
           <Image
             src={photos.whatsappQr}
             alt="QR code to start a WhatsApp chat with Garam Dibba"
-            fill
             placeholder="blur"
-            sizes="(max-width: 760px) 100vw, 620px"
+            sizes="(max-width: 760px) 90vw, 440px"
           />
           <div className="promise-note">Scan to WhatsApp</div>
         </div>

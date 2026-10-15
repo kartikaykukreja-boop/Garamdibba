@@ -1,4 +1,5 @@
 import SiteHeader from '../SiteHeader.jsx'
+import MobileDock from '../MobileDock.jsx'
 import { SiteFooter, WhatsAppFloat } from '../site.jsx'
 import { JsonLd } from '../seo.jsx'
 import { SITE_URL, businessSchema } from '../siteData.js'
@@ -47,6 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         {children}
         <SiteFooter />
         <WhatsAppFloat />
+        <MobileDock />
         <JsonLd data={businessSchema} />
       </body>
     </html>

@@ -19,11 +19,11 @@ export function whatsappHref(message = 'Hi Garam Dibba! I would like to order a 
 export const DELIVERY_AREAS = []
 
 export const plans = [
-  { id: '1-day', name: '1-Day Plan', short: '1-Day', price: 180, note: 'Need a meal for today? Start here.' },
-  { id: '3-day', name: '3-Day Plan', short: '3-Day', price: 150, note: 'Try a few different meals.' },
-  { id: '1-week', name: '1-Week Plan', short: '1-Week', price: 130, note: 'Your meals, sorted for the week.' },
-  { id: '2-week', name: '2-Week Plan', short: '2-Week', price: 120, note: 'Planning a little further ahead.' },
-  { id: '4-week', name: '4-Week Plan', short: '4-Week', price: 110, note: 'A longer-term tiffin routine.', best: true },
+  { id: '1-day', name: '1-Day Plan', short: '1-Day', price: 180, boxes: 1, total: 180, note: 'Need a meal for today? Start here.' },
+  { id: '3-day', name: '3-Day Plan', short: '3-Day', price: 150, boxes: 3, total: 450, note: 'Try a few different meals.' },
+  { id: '1-week', name: '1-Week Plan', short: '1-Week', price: 135, boxes: 6, total: 810, note: 'Six boxes, Monday to Saturday.' },
+  { id: '2-week', name: '2-Week Plan', short: '2-Week', price: 130, boxes: 12, total: 1560, note: 'Planning a little further ahead.' },
+  { id: '4-week', name: '4-Week Plan', short: '4-Week', price: 120, boxes: 24, total: 2880, note: 'A longer-term tiffin routine.', best: true },
 ]
 
 export const proteinBowlPlans = [
@@ -145,7 +145,7 @@ export const dehradunFaqs = [
   },
   {
     q: 'How much does Garam Dibba cost?',
-    a: 'Protein bowl plans run from ₹130 to ₹180 per box. The separate North Indian lunch plans run from ₹110 to ₹180 per box.',
+    a: 'Protein bowl plans run from ₹130 to ₹180 per box. The separate North Indian lunch plans run from ₹120 to ₹180 per box.',
   },
   {
     q: 'Do you offer daily tiffin?',
@@ -187,7 +187,7 @@ export const businessSchema = {
   email: CONTACT_EMAIL,
   image: `${SITE_URL}/bowls/paneer-lababdar.jpg`,
   servesCuisine: ['Indian', 'North Indian', 'Vegetarian'],
-  priceRange: '₹110–₹180 per box',
+  priceRange: '₹120–₹180 per box',
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Dehradun',
