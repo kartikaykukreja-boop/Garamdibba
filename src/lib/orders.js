@@ -19,3 +19,14 @@ export function statusPatch(status) {
   if (status === 'delivered') patch.delivered_at = new Date().toISOString()
   return patch
 }
+
+// Location privacy: once a rider has nothing out for delivery, their last GPS point is deleted.
+export async function forgetRiderLocationIfIdle(admin, riderId) {
+  if (!riderId) return
+  const { count } = await admin
+    .from('deliveries')
+    .select('id', { count: 'exact', head: true })
+    .eq('rider_id', riderId)
+    .eq('status', 'out_for_delivery')
+  if (!count) await admin.from('rider_locations').delete().eq('rider_id', riderId)
+}

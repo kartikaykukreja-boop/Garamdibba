@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 import { actionSession } from '../../lib/auth.js'
 import { createAdminClient } from '../../lib/supabase/server.js'
-import { completeOrderIfDone, statusPatch } from '../../lib/orders.js'
+import { completeOrderIfDone, forgetRiderLocationIfIdle, statusPatch } from '../../lib/orders.js'
 import { isValidYmd, todayIST } from '../../lib/dates.js'
 import { loadClosedDates, nextCreditSlot } from '../../lib/orderData.js'
 import { clean } from '../../lib/validate.js'
@@ -56,9 +56,10 @@ export async function setDeliveryStatus(formData) {
     .from('deliveries')
     .update(statusPatch(status))
     .eq('id', String(formData.get('delivery_id')))
-    .select('order_id')
+    .select('order_id, rider_id')
     .maybeSingle()
   if (delivery && ['delivered', 'cancelled'].includes(status)) await completeOrderIfDone(admin, delivery.order_id)
+  if (delivery && status !== 'out_for_delivery') await forgetRiderLocationIfIdle(admin, delivery.rider_id)
   await logEvent(EVENTS.DELIVERY_STATUS_SET, { userId: user.id, detail: { delivery: String(formData.get('delivery_id')), status } })
   redirect(back(formData, 'msg=saved'))
 }

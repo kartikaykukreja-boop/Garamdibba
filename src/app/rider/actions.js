@@ -2,7 +2,7 @@
 
 import { actionSession } from '../../lib/auth.js'
 import { createAdminClient } from '../../lib/supabase/server.js'
-import { completeOrderIfDone, statusPatch } from '../../lib/orders.js'
+import { completeOrderIfDone, forgetRiderLocationIfIdle, statusPatch } from '../../lib/orders.js'
 import { distanceKm, isValidPoint } from '../../lib/geo.js'
 import { formatDate, formatTime, todayIST } from '../../lib/dates.js'
 import { loadClosedDates, nextCreditSlot, uploadPhoto } from '../../lib/orderData.js'
@@ -35,21 +35,12 @@ async function riderDelivery(deliveryId) {
   return { session, admin, delivery }
 }
 
-// Location privacy: once a rider has nothing out for delivery, their last GPS point is deleted.
-async function forgetRiderLocationIfIdle(admin, riderId) {
-  if (!riderId) return
-  const { count } = await admin
-    .from('deliveries')
-    .select('id', { count: 'exact', head: true })
-    .eq('rider_id', riderId)
-    .eq('status', 'out_for_delivery')
-  if (!count) await admin.from('rider_locations').delete().eq('rider_id', riderId)
-}
-
 // Picked up: the customer's tracker goes live.
 export async function startDelivery(deliveryId) {
   const { error, admin, delivery } = await riderDelivery(deliveryId)
   if (error) return { error }
+  // Only today's drops can go live (stops a future customer seeing the rider's location).
+  if (delivery.delivery_date !== todayIST()) return { error: 'You can only start today’s deliveries.' }
   const { error: updateError } = await admin.from('deliveries').update(statusPatch('out_for_delivery')).eq('id', deliveryId)
   if (updateError) return { error: 'Could not update. Please try again.' }
   await notify('on_the_way', {

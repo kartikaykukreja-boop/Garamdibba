@@ -35,6 +35,7 @@ const MESSAGES = {
   report_reason: 'Please choose what went wrong.',
   report_late: 'Reports for this box have closed. Please WhatsApp us and we’ll help.',
   report_open: 'You’ve already reported this box. We’re on it.',
+  slot_full: 'That slot is full or not available for your area on one of your days. Please pick another slot.',
   rate: 'Too many changes in a short time. Please wait a few minutes and try again.',
   generic: 'Something went wrong. Please try again.',
 }

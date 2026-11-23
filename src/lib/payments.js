@@ -2,10 +2,25 @@
 // Used by both the browser callback (server action) and the webhook, and safe to run twice.
 import { createAdminClient } from './supabase/server.js'
 import { notify } from './notify.js'
-import { slotLabel } from './rules.js'
-import { formatDate } from './dates.js'
+import { MEALS, minutesOf, slotLabel } from './rules.js'
+import { formatDate, istMinutes, todayIST } from './dates.js'
 import { capturePayment, fetchPayment, toPaise } from './razorpay.js'
 import { EVENTS, logEvent } from './securityLog.js'
+
+// An unpaid order expires after ORDER_PAYMENT_MINUTES, or once its first meal's cutoff has
+// passed (plus a short grace for payments already in progress).
+const ORDER_PAYMENT_MINUTES = 45
+const CUTOFF_GRACE_MINUTES = 15
+function isStale(o, now = new Date()) {
+  if (now.getTime() - Date.parse(o.created_at) > ORDER_PAYMENT_MINUTES * 60000) return true
+  const today = todayIST(now)
+  if (o.start_date < today) return true
+  if (o.start_date === today) {
+    const cutoff = MEALS[o.meal]?.cutoff ?? MEALS.lunch.cutoff
+    if (istMinutes(now) > minutesOf(cutoff) + CUTOFF_GRACE_MINUTES) return true
+  }
+  return false
+}
 
 // A payment only counts if Razorpay itself says it belongs to this Razorpay order, is in
 // INR, is for exactly the amount we stored, and is captured (an authorized payment is
@@ -35,7 +50,7 @@ export async function settleRazorpayPayment({ razorpayOrderId, paymentId, paymen
   // All orders in one basket share the Razorpay order; the payment must cover all of them.
   const { data: orders } = await admin
     .from('orders')
-    .select('id, user_id, total, status, payment_method, order_number')
+    .select('id, user_id, total, status, payment_method, order_number, created_at, start_date, meal')
     .eq('razorpay_order_id', razorpayOrderId)
     .order('order_number')
   if (orders?.length) {
@@ -48,6 +63,20 @@ export async function settleRazorpayPayment({ razorpayOrderId, paymentId, paymen
     if (!check.ok) {
       await logEvent(EVENTS.PAYMENT_MISMATCH, { userId: first.user_id, detail: { orders: orders.map((o) => o.id), reason: check.reason } })
       return { kind: 'order', orderId: first.id, error: check.reason }
+    }
+    // Paid too late (abandoned checkout paid later, or past the meal's cutoff): don't cook it,
+    // mark the money for refund instead. Prevents bypassing cutoffs and slot capacity.
+    const stale = pending.filter(isStale)
+    if (stale.length) {
+      for (const o of pending) {
+        await admin
+          .from('orders')
+          .update({ status: 'cancelled', razorpay_payment_id: paymentId, paid_at: new Date().toISOString(), refund_due: o.total })
+          .eq('id', o.id)
+          .eq('status', 'pending_payment')
+      }
+      await logEvent(EVENTS.PAYMENT_MISMATCH, { userId: first.user_id, detail: { orders: pending.map((o) => o.id), reason: 'paid_after_expiry' } })
+      return { kind: 'order', orderId: first.id, error: 'expired' }
     }
     for (const o of pending) {
       const { data: confirmed, error } = await admin.rpc('confirm_online_order', { p_order_id: o.id, p_payment_id: paymentId })

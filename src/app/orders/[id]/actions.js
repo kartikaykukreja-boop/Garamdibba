@@ -5,7 +5,8 @@ import { actionSession } from '../../../lib/auth.js'
 import { createAdminClient } from '../../../lib/supabase/server.js'
 import { dishFor } from '../../../lib/catalog.js'
 import { canSkip, formatDate, isValidYmd, planDates, windowEnd } from '../../../lib/dates.js'
-import { loadClosedDates, nextCreditSlot, uploadPhoto } from '../../../lib/orderData.js'
+import { loadClosedDates, nextCreditSlot, slotLoad, uploadPhoto } from '../../../lib/orderData.js'
+import { slotAllowed } from '../../../lib/slots.js'
 import { notify } from '../../../lib/notify.js'
 import { MEALS, REPORT_REASONS, REPORT_WINDOW_MINUTES } from '../../../lib/rules.js'
 import { clean } from '../../../lib/validate.js'
@@ -55,7 +56,8 @@ export async function pausePlan(formData) {
   const { data: rows } = await admin.from('deliveries').select('id, delivery_date').eq('order_id', orderId).eq('status', 'scheduled')
   const ids = (rows ?? []).filter((r) => canSkip(r.delivery_date)).map((r) => r.id)
   if (!ids.length) back(orderId, 'err=nothing_to_pause')
-  await admin.from('deliveries').update({ status: 'paused' }).in('id', ids)
+  // Only rows still 'scheduled' are paused, so a skip or cancel racing this can't be undone.
+  await admin.from('deliveries').update({ status: 'paused' }).in('id', ids).eq('status', 'scheduled')
   back(orderId, 'msg=paused')
 }
 
@@ -90,6 +92,7 @@ export async function resumePlan(formData) {
       .from('deliveries')
       .update({ status: 'scheduled', delivery_date: dates[i], item_name: dishFor(order.menu, dates[i], order.bowl_choice).label })
       .eq('id', row.id)
+      .eq('status', 'paused')
   }
   back(orderId, 'msg=resumed')
 }
@@ -101,9 +104,16 @@ export async function changeSlot(formData) {
   const { admin, order, session } = await ownOrder(orderId)
   if (!MEALS[order.meal]?.slots.some((s) => s.id === slot)) back(orderId, 'err=generic')
   const { data: rows } = await admin.from('deliveries').select('id, delivery_date').eq('order_id', orderId).in('status', ['scheduled', 'paused'])
-  const ids = (rows ?? []).filter((r) => canSkip(r.delivery_date)).map((r) => r.id)
+  const changeable = (rows ?? []).filter((r) => canSkip(r.delivery_date))
+  for (const date of new Set(changeable.map((r) => r.delivery_date))) {
+    const load = await slotLoad(admin, date, order.meal)
+    if (!slotAllowed({ meal: order.meal, date, roadKm: order.road_km == null ? null : Number(order.road_km), load }, slot)) {
+      back(orderId, 'err=slot_full')
+    }
+  }
+  const ids = changeable.map((r) => r.id)
   await admin.from('orders').update({ slot }).eq('id', orderId)
-  if (ids.length) await admin.from('deliveries').update({ slot }).in('id', ids)
+  if (ids.length) await admin.from('deliveries').update({ slot }).in('id', ids).in('status', ['scheduled', 'paused'])
   await admin.from('profiles').update({ default_meal: order.meal, default_slot: slot }).eq('id', session.user.id)
   back(orderId, 'msg=slot')
 }
@@ -119,6 +129,12 @@ export async function reportBox(formData) {
   const { data: d } = await admin.from('deliveries').select('*').eq('id', deliveryId).eq('order_id', orderId).maybeSingle()
   if (!d || !['delivered', 'out_for_delivery'].includes(d.status)) back(orderId, 'err=generic')
   if (Date.now() > windowEnd(d.delivery_date, d.meal) + REPORT_WINDOW_MINUTES * 60000) back(orderId, 'err=report_late')
+  const { count: upheld } = await admin
+    .from('delivery_reports')
+    .select('id', { count: 'exact', head: true })
+    .eq('delivery_id', d.id)
+    .in('status', ['open', 'refund', 'make_up'])
+  if (upheld) back(orderId, 'err=report_open')
 
   const photo = formData.get('photo')
   const photoPath = photo?.size ? await uploadPhoto(admin, `reports/${deliveryId}-${Date.now()}.jpg`, photo) : null

@@ -41,6 +41,9 @@ const securityHeaders = [
   ...(dev ? [] : [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }]),
 ]
 
+const NO_THIRD_PARTY = ['/admin/:path*', '/rider/:path*', '/account/:path*', '/orders/:path*', '/company/:path*']
+const strictScripts = `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ''} https://checkout.razorpay.com https://*.razorpay.com`
+
 const PRIVATE = ['/admin/:path*', '/account/:path*', '/orders/:path*', '/order/:path*', '/rider/:path*', '/company/:path*', '/login', '/auth/:path*', '/api/:path*']
 
 /** @type {import('next').NextConfig} */
@@ -68,6 +71,9 @@ const nextConfig = {
       { source: '/:path*', headers: securityHeaders },
       // Signed-in pages are never indexed by search engines.
       ...PRIVATE.map((source) => ({ source, headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] })),
+      // Pages showing customer data or staff tools: a second, stricter policy blocks third-party
+      // scripts (Google Tag Manager). Browsers enforce both policies, so the stricter one wins.
+      ...NO_THIRD_PARTY.map((source) => ({ source, headers: [{ key: 'Content-Security-Policy', value: strictScripts }] })),
     ]
   },
 }

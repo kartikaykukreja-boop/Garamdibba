@@ -341,7 +341,10 @@ begin
                              where order_id = o.id and status in ('scheduled', 'preparing', 'out_for_delivery', 'paused')) then 'completed'
            else o.status
          end,
-         refund_due = case when o.payment_method = 'online' and refund > 0 then refund else null end
+         refund_due = case
+           when o.payment_method = 'online' and refund > 0 then coalesce(o.refund_due, 0) + refund
+           else o.refund_due
+         end
    where id = o.id;
   return refund;
 end $$;

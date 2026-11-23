@@ -102,8 +102,15 @@ export const conflicts = (dishAllergens = [], customerAllergies = []) =>
 
 // Price an extras selection against the catalog. Unknown, inactive or out-of-stock items are dropped.
 export function priceExtras(selection = [], catalog = []) {
+  // Merge repeated items first, so [{sprite: 10}, {sprite: 10}] is checked as 20 against stock.
+  const merged = new Map()
+  for (const pick of Array.isArray(selection) ? selection : []) {
+    const qty = Math.trunc(Number(pick?.qty))
+    if (typeof pick?.id !== 'string' || !Number.isFinite(qty) || qty < 1) continue
+    merged.set(pick.id, (merged.get(pick.id) ?? 0) + qty)
+  }
   const lines = []
-  for (const pick of selection) {
+  for (const pick of [...merged].map(([id, qty]) => ({ id, qty }))) {
     const item = catalog.find((x) => x.id === pick.id && x.active)
     const qty = Math.trunc(Number(pick.qty))
     if (!item || !Number.isFinite(qty) || qty < 1 || qty > 10) continue

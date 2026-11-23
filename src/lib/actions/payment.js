@@ -29,6 +29,9 @@ export async function confirmPayment(response) {
 
   try {
     const result = await settleRazorpayPayment({ razorpayOrderId: orderId, paymentId })
+    if (result.error === 'expired') {
+      return { error: 'This checkout expired before the payment went through, so we haven’t booked it. Your money will be refunded in full; please place a fresh order.' }
+    }
     if (result.error) {
       return { error: 'We couldn’t confirm this payment with Razorpay yet. If money was deducted, it will update shortly or be refunded. Contact us with your payment ID if it doesn’t.' }
     }

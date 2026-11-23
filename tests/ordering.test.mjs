@@ -92,3 +92,11 @@ test('Razorpay signatures: forged or modified signatures fail', async () => {
   assert.equal(verifyWebhookSignature(body.replace('captured', 'failed'), hook), false)
   assert.equal(verifyWebhookSignature(body, null), false)
 })
+
+test('repeating an add-on line cannot beat the stock limit (review finding 6)', () => {
+  const catalog = [{ id: 'sprite', name: 'Sprite', kind: 'drink', price: 40, stock: 12, active: true, menus: ['north_indian', 'protein_bowl'] }]
+  const b = quoteBasket({ lines: [bowlDay], extras: [{ id: 'sprite', qty: 10 }, { id: 'sprite', qty: 10 }], extrasCatalog: catalog })
+  assert.equal(b.extras.length, 0) // 20 > 12 in stock: rejected, not sold twice
+  const ok = quoteBasket({ lines: [bowlDay], extras: [{ id: 'sprite', qty: 5 }, { id: 'sprite', qty: 5 }], extrasCatalog: catalog })
+  assert.equal(ok.extrasTotal, 400)
+})

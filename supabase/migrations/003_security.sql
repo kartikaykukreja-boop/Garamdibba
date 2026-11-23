@@ -69,6 +69,23 @@ returns boolean language sql stable security definer set search_path = public as
       or public.is_admin();
 $$;
 
+-- ─────────────────────────────────────────────────────────────
+-- Independent review fixes
+-- ─────────────────────────────────────────────────────────────
+
+-- A box can only have one report that is open or was decided in the customer's favour,
+-- so the same box can't be refunded or re-made twice.
+create unique index if not exists delivery_reports_one_upheld
+  on public.delivery_reports (delivery_id) where status in ('open', 'refund', 'make_up');
+
+-- Browsers only need to read deliveries (live tracking) and rider_locations (map).
+-- Everything else is read by the server, so the publishable key can't read profiles,
+-- orders or company data (e.g. a company's join code or wallet) at all.
+revoke select on public.profiles, public.orders, public.companies, public.company_topups, public.company_transactions from authenticated;
+revoke all on public.profiles, public.orders, public.companies, public.company_topups, public.company_transactions,
+  public.deliveries, public.rider_locations, public.extras, public.waitlist, public.closed_dates,
+  public.delivery_reports, public.rate_limits, public.security_events from anon;
+
 -- Server-only.
 revoke all on function public.rate_limit_hit(text, int, int) from public, anon, authenticated;
 grant execute on function public.rate_limit_hit(text, int, int) to service_role;
