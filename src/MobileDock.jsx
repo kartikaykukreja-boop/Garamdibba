@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CalendarDays, Home, MessageCircle, Utensils } from 'lucide-react'
+import { Home, MessageCircle, Package, ShoppingBag, Utensils } from 'lucide-react'
 import { whatsappHref } from './siteData.js'
 
 const items = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/menu', label: 'Menu', icon: Utensils },
-  { href: '/meal-plans', label: 'Plans', icon: CalendarDays },
+  { href: '/order', label: 'Order', icon: ShoppingBag, primary: true },
+  { href: '/orders', label: 'My orders', icon: Package },
 ]
 
 export default function MobileDock() {
@@ -17,9 +18,9 @@ export default function MobileDock() {
 
   return (
     <nav className="mobile-dock" aria-label="Quick navigation">
-      {items.map(({ href, label, icon: Icon }) => (
+      {items.map(({ href, label, icon: Icon, primary }) => (
         <Link
-          className={isActive(href) ? 'mobile-dock-link is-active' : 'mobile-dock-link'}
+          className={`mobile-dock-link${primary ? ' mobile-dock-primary' : ''}${isActive(href) ? ' is-active' : ''}`}
           href={href}
           aria-current={isActive(href) ? 'page' : undefined}
           key={href}
@@ -35,7 +36,7 @@ export default function MobileDock() {
         rel="noreferrer"
       >
         <MessageCircle aria-hidden="true" />
-        <span>Order</span>
+        <span>WhatsApp</span>
       </a>
     </nav>
   )

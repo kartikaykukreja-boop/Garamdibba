@@ -3603,7 +3603,7 @@ h3 {
     left: 10px;
     min-height: 62px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     padding: 5px;
     border: 1px solid rgba(143, 33, 23, 0.18);
     border-radius: 20px;
@@ -3639,6 +3639,13 @@ h3 {
   .mobile-dock-order {
     color: #fff;
     background: #1f8f50;
+  }
+
+  .mobile-dock-primary,
+  .mobile-dock-primary.is-active {
+    margin-inline: 3px;
+    color: var(--cream);
+    background: var(--red);
   }
 
   .faq-item p {

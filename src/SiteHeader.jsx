@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu as MenuIcon, MessageCircle, Phone, X } from 'lucide-react'
-import { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_SHORT, PHONE_HREF, whatsappHref } from './siteData.js'
+import { Menu as MenuIcon, Phone, ShoppingBag, X } from 'lucide-react'
+import { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_SHORT, PHONE_HREF } from './siteData.js'
 import { BrandMark } from './site.jsx'
 
 const links = [
@@ -14,6 +14,7 @@ const links = [
   { to: '/tiffin-delivery-dehradun', label: 'Delivery' },
   { to: '/about', label: 'Our story' },
   { to: '/contact', label: 'Contact' },
+  { to: '/orders', label: 'My orders' },
 ]
 
 export default function SiteHeader() {
@@ -48,16 +49,10 @@ export default function SiteHeader() {
               {link.label}
             </Link>
           ))}
-          <a
-            className="button button-small nav-order"
-            href={whatsappHref()}
-            target="_blank"
-            rel="noreferrer"
-            onClick={() => setOpen(false)}
-          >
-            <MessageCircle size={18} />
-            Order on WhatsApp
-          </a>
+          <Link className="button button-small nav-order" href="/order" onClick={() => setOpen(false)}>
+            <ShoppingBag size={18} />
+            Order online
+          </Link>
         </nav>
 
         <div className="header-actions">
