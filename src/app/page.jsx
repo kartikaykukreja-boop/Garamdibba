@@ -5,7 +5,6 @@ import {
   CalendarDays,
   IndianRupee,
   MapPin,
-  MessageCircle,
   Soup,
   Sparkles,
   Utensils,
@@ -13,6 +12,7 @@ import {
 import {
   BowlShowcase,
   ButtonLink,
+  OrderOnlineButton,
   CallToAction,
   DeliveryBand,
   Eyebrow,
@@ -39,7 +39,7 @@ export default function HomePage() {
             your food delivered Monday to Saturday.
           </p>
           <div className="hero-actions">
-            <ButtonLink to="/menu">Browse menu</ButtonLink>
+            <OrderOnlineButton />
             <ButtonLink to="/meal-plans" className="button-cream">View plans</ButtonLink>
           </div>
           <div className="hero-meta" aria-label="Service highlights">
@@ -198,14 +198,10 @@ export default function HomePage() {
         <div className="shell">
           <div>
             <p className="eyebrow eyebrow-light">Ready for lunch?</p>
-            <h2>Order in a message.</h2>
-            <p>Tell us your meal and location. We’ll take it from there.</p>
+            <h2>Order in a minute.</h2>
+            <p>Pick your plan, pin your address and pay online. We’ll take it from there.</p>
           </div>
-          <a className="button button-cream" href={whatsappHref()} target="_blank" rel="noreferrer">
-            <MessageCircle aria-hidden="true" />
-            Chat on WhatsApp
-            <ArrowRight aria-hidden="true" />
-          </a>
+          <OrderOnlineButton className="button-cream" />
         </div>
       </section>
     </main>

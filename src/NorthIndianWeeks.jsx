@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Flame, Leaf, Utensils } from 'lucide-react'
 import { northIndianMenu } from './siteData.js'
-import { OrderButton } from './site.jsx'
+import { OrderOnlineButton } from './site.jsx'
 
 export default function NorthIndianWeeks() {
   const [activeWeek, setActiveWeek] = useState('Week 1')
@@ -49,12 +49,9 @@ export default function NorthIndianWeeks() {
               <Utensils size={17} />
               <span>{item.sides}</span>
             </div>
-            <OrderButton
-              className="menu-order-link"
-              message={`Hi Garam Dibba! I would like to order the ${item.day} ${activeWeek} North Indian lunch with ${item.main}. 🍱`}
-            >
+            <OrderOnlineButton className="menu-order-link" plan="1-day">
               Order this dibba
-            </OrderButton>
+            </OrderOnlineButton>
           </article>
         ))}
       </div>

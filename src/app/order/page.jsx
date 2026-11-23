@@ -2,12 +2,27 @@ import { requireSession } from '../../lib/auth.js'
 import { createAdminClient } from '../../lib/supabase/server.js'
 import { DELIVERY_RADIUS_KM, KITCHEN } from '../../lib/config.js'
 import { earliestStartDate, latestStartDate } from '../../lib/dates.js'
+import { MENUS } from '../../lib/catalog.js'
+import { bowls } from '../../siteData.js'
 import OrderBuilder from './OrderBuilder.jsx'
 
 export const metadata = { title: 'Order online | Garam Dibba', robots: { index: false } }
 
-export default async function OrderPage() {
-  const { user, profile } = await requireSession('/order')
+// Site buttons link here as /order?plan=<plan id> or /order?bowl=<bowl slug>
+// so the chosen plan or bowl is already selected.
+function initialChoice({ plan, bowl }) {
+  const menu = Object.values(MENUS).find((m) => m.plans.some((p) => p.id === plan))
+  const bowlSlug = bowls.some((b) => b.slug === bowl) ? bowl : ''
+  if (menu) return { menu: menu.id, planId: plan, bowlSlug: menu.id === 'protein_bowl' ? bowlSlug : '' }
+  return { menu: 'protein_bowl', planId: MENUS.protein_bowl.plans[0].id, bowlSlug }
+}
+
+export default async function OrderPage({ searchParams }) {
+  const params = await searchParams
+  const query = new URLSearchParams(
+    Object.entries({ plan: params.plan, bowl: params.bowl }).filter(([, v]) => typeof v === 'string'),
+  ).toString()
+  const { user, profile } = await requireSession(query ? `/order?${query}` : '/order')
   const admin = createAdminClient()
 
   const { data: lastOrder } = await admin
@@ -44,6 +59,7 @@ export default async function OrderPage() {
           earliest={earliestStartDate()}
           latest={latestStartDate()}
           company={company}
+          initial={initialChoice(params)}
           defaults={{
             name: profile.full_name ?? '',
             phone: profile.phone ?? '',

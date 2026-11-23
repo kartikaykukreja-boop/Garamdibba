@@ -8,6 +8,7 @@ import {
   MapPin,
   MessageCircle,
   Phone,
+  ShoppingBag,
   Utensils,
 } from 'lucide-react'
 import {
@@ -59,6 +60,18 @@ export function OrderButton({ className = '', message, children = 'Order on What
       {children}
       <ArrowRight size={18} />
     </a>
+  )
+}
+
+// Opens online ordering. plan / bowl preselect that choice on the order page.
+export function OrderOnlineButton({ className = '', plan, bowl, children = 'Order online' }) {
+  const query = new URLSearchParams(Object.entries({ plan, bowl }).filter(([, v]) => v)).toString()
+  return (
+    <Link className={`button ${className}`.trim()} href={query ? `/order?${query}` : '/order'}>
+      <ShoppingBag size={20} />
+      {children}
+      <ArrowRight size={18} />
+    </Link>
   )
 }
 
@@ -153,12 +166,9 @@ export function BowlCards() {
             <span className="menu-index">0{index + 1}</span>
             <h3>{bowl.name}</h3>
             <p>{bowl.blurb}</p>
-            <OrderButton
-              className="menu-order-link"
-              message={`Hi Garam Dibba! I would like to order the ${bowl.name}. 🍱`}
-            >
+            <OrderOnlineButton className="menu-order-link" bowl={bowl.slug}>
               Order this bowl
-            </OrderButton>
+            </OrderOnlineButton>
           </div>
         </article>
       ))}
@@ -183,7 +193,7 @@ export function HeroMosaic({ className = '' }) {
   )
 }
 
-export function PlanGrid({ items = plans, menuName = 'North Indian lunch' }) {
+export function PlanGrid({ items = plans }) {
   return (
     <div className={items.length === 4 ? 'plan-grid plan-grid-four' : 'plan-grid'}>
       {items.map((plan) => (
@@ -201,12 +211,9 @@ export function PlanGrid({ items = plans, menuName = 'North Indian lunch' }) {
             </p>
           )}
           <p className="plan-note">{plan.note}</p>
-          <OrderButton
-            className="menu-order-link"
-            message={`Hi Garam Dibba! I would like to start the ${plan.name} for ${menuName} (₹${plan.price}/box${plan.total ? `, ₹${plan.total.toLocaleString('en-IN')} total` : ''}). 🍱`}
-          >
+          <OrderOnlineButton className="menu-order-link" plan={plan.id}>
             Choose plan
-          </OrderButton>
+          </OrderOnlineButton>
         </article>
       ))}
     </div>
@@ -258,7 +265,7 @@ export function ProteinBowlProgram({ showPlans = true }) {
             <h3>Choose Your Protein Bowl Plan</h3>
             <p className="section-sub">These prices apply to protein bowls and are separate from the North Indian lunch plans.</p>
           </div>
-          <PlanGrid items={proteinBowlPlans} menuName="protein bowls" />
+          <PlanGrid items={proteinBowlPlans} />
           <div className="plans-foot">
             <p>
               <CalendarDays size={18} aria-hidden="true" />
@@ -311,7 +318,7 @@ export function DeliveryBand({ eyebrow = 'Tiffin near you', title, children, sho
         <div className="delivery-band-actions">
           <OrderButton message={CHECK_DELIVERY_MESSAGE}>Check Delivery Availability</OrderButton>
           {showOrder ? (
-            <OrderButton className="button-outline">Order Now</OrderButton>
+            <OrderOnlineButton className="button-outline">Order Now</OrderOnlineButton>
           ) : (
             <a className="text-link" href={PHONE_HREF}>
               <Phone size={16} /> Or call {CONTACT_PHONE_DISPLAY}
@@ -410,9 +417,9 @@ export function HowSteps({ title = 'From menu to dibba in three taps.', eyebrow 
           <ChevronRight className="how-arrow" />
           <article>
             <span>3</span>
-            <MessageCircle />
-            <h3>Order on WhatsApp</h3>
-            <p>Your order message opens ready to send. We confirm the details with you.</p>
+            <ShoppingBag />
+            <h3>Order online</h3>
+            <p>Pin your address, pay securely and track your dibba on its way. Prefer chat? WhatsApp works too.</p>
           </article>
         </div>
       </div>
@@ -464,11 +471,12 @@ export function CallToAction({ title = 'Ready for a proper lunch?' }) {
           <Eyebrow light>Garam hai. Ghar jaisa hai.</Eyebrow>
           <h2>{title}</h2>
           <p>
-            Tell us what you’d like. Your WhatsApp message is already packed and ready, or call us on{' '}
+            Order online in a minute, message us on{' '}
+            <a href={whatsappHref()} target="_blank" rel="noreferrer">WhatsApp</a>, or call us on{' '}
             <a href={PHONE_HREF}>{CONTACT_PHONE_DISPLAY}</a>.
           </p>
         </div>
-        <OrderButton className="button-cream">Chat & order</OrderButton>
+        <OrderOnlineButton className="button-cream" />
       </div>
     </section>
   )
@@ -499,7 +507,8 @@ export function SiteFooter() {
         </div>
         <div className="footer-links">
           <p>Hungry?</p>
-          <a href={whatsappHref()} target="_blank" rel="noreferrer">Order on WhatsApp</a>
+          <Link href="/order">Order online</Link>
+          <a href={whatsappHref()} target="_blank" rel="noreferrer">Chat on WhatsApp</a>
           <a href={PHONE_HREF}>{CONTACT_PHONE_DISPLAY}</a>
           <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
           <span>Monday–Saturday</span>
@@ -520,10 +529,10 @@ export function WhatsAppFloat() {
       href={whatsappHref()}
       target="_blank"
       rel="noreferrer"
-      aria-label="Order on WhatsApp"
+      aria-label="Chat on WhatsApp"
     >
       <MessageCircle />
-      <span>Order on WhatsApp</span>
+      <span>Chat on WhatsApp</span>
     </a>
   )
 }

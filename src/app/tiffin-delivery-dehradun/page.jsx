@@ -5,6 +5,7 @@ import {
   DeliveryBand,
   Eyebrow,
   OrderButton,
+  OrderOnlineButton,
   PageHero,
   PlansSection,
 } from '../../site.jsx'
@@ -32,7 +33,7 @@ export default function DeliveryPage() {
         actions={(
           <>
             <OrderButton message={CHECK_DELIVERY_MESSAGE}>Check Delivery Availability</OrderButton>
-            <OrderButton className="button-cream">Order Now</OrderButton>
+            <OrderOnlineButton className="button-cream">Order Now</OrderOnlineButton>
           </>
         )}
       >

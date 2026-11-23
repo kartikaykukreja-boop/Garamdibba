@@ -14,11 +14,11 @@ import { openRazorpay } from '../../lib/razorpayCheckout.js'
 
 const rupees = (n) => `₹${Number(n).toLocaleString('en-IN')}`
 
-export default function OrderBuilder({ kitchen, radiusKm, earliest, latest, company, defaults }) {
+export default function OrderBuilder({ kitchen, radiusKm, earliest, latest, company, defaults, initial }) {
   const router = useRouter()
-  const [menu, setMenu] = useState('protein_bowl')
-  const [planId, setPlanId] = useState(MENUS.protein_bowl.plans[0].id)
-  const [bowlSlug, setBowlSlug] = useState('')
+  const [menu, setMenu] = useState(initial.menu)
+  const [planId, setPlanId] = useState(initial.planId)
+  const [bowlSlug, setBowlSlug] = useState(initial.bowlSlug)
   const [quantity, setQuantity] = useState(1)
   const [startDate, setStartDate] = useState(earliest)
   const [point, setPoint] = useState(defaults.point)

@@ -5,7 +5,7 @@ import {
   Eyebrow,
   FaqSection,
   HowSteps,
-  OrderButton,
+  OrderOnlineButton,
   PageHero,
   PlanGrid,
   ProteinBowlProgram,
@@ -26,7 +26,7 @@ export default function MealPlansPage() {
         alt="Garam Dibba Paneer Pasanda bowl with paneer, creamy gravy, rice and pickled onion"
         actions={(
           <>
-            <OrderButton>Order on WhatsApp</OrderButton>
+            <OrderOnlineButton />
             <ButtonLink to="/menu" className="button-cream">View Menu</ButtonLink>
           </>
         )}

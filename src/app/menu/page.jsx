@@ -136,7 +136,7 @@ export default function MenuPage() {
                 <h3>Choose Your North Indian Lunch Plan</h3>
                 <p className="section-sub">These prices apply to the North Indian lunch menu and are separate from the protein bowl plans.</p>
               </div>
-              <PlanGrid items={plans} menuName="North Indian lunch" />
+              <PlanGrid items={plans} />
               <div className="plans-foot">
                 <p>
                   <CalendarDays size={18} aria-hidden="true" />
