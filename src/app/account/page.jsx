@@ -25,6 +25,7 @@ const MESSAGES = {
   code: 'That company code doesn’t match an active company. Check it with your HR.',
   company_name: 'Please enter your company’s name.',
   last_hr: 'You’re the only HR admin. Make a colleague HR from the Company page before leaving.',
+  rate: 'Too many attempts. Please wait a few minutes and try again.',
   generic: 'Something went wrong. Please try again.',
 }
 

@@ -35,6 +35,7 @@ const MESSAGES = {
   report_reason: 'Please choose what went wrong.',
   report_late: 'Reports for this box have closed. Please WhatsApp us and we’ll help.',
   report_open: 'You’ve already reported this box. We’re on it.',
+  rate: 'Too many changes in a short time. Please wait a few minutes and try again.',
   generic: 'Something went wrong. Please try again.',
 }
 
@@ -50,13 +51,18 @@ function firstChangeableDate() {
 export default async function OrderDetailPage({ params, searchParams }) {
   const { id } = await params
   const query = await searchParams
-  const { user, profile } = await requireSession(`/orders/${id}`)
+  const session = await requireSession(`/orders/${id}`)
+  const { user, profile } = session
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound()
 
   const admin = createAdminClient()
   const { data: order } = await admin.from('orders').select('*, deliveries(*)').eq('id', id).maybeSingle()
-  if (!order || (order.user_id !== user.id && profile.role !== 'admin')) notFound()
+  if (!order || (order.user_id !== user.id && !session.isAdmin)) notFound()
   const { data: reports } = await admin.from('delivery_reports').select('delivery_id, status').eq('order_id', id)
+  // Other meals bought in the same basket (one payment).
+  const { data: siblings } = order.checkout_id
+    ? await admin.from('orders').select('id, order_number, plan_name').eq('checkout_id', order.checkout_id).neq('id', order.id).eq('user_id', order.user_id)
+    : { data: [] }
 
   const deliveries = [...order.deliveries].sort((a, b) => a.delivery_date.localeCompare(b.delivery_date) || a.created_at.localeCompare(b.created_at))
   const photos = await signedPhotoUrls(admin, deliveries.map((d) => d.proof_path))
@@ -136,6 +142,14 @@ export default async function OrderDetailPage({ params, searchParams }) {
             {' · '}<Link href={`/orders/${order.id}/receipt`}><Receipt size={14} aria-hidden="true" /> Receipt</Link>
           </p>
           {order.refund_due && <p className="app-alert">A refund of {rupees(order.refund_due)} is being processed to your original payment method.</p>}
+          {siblings?.length > 0 && (
+            <p className="app-muted">
+              Also in this checkout:{' '}
+              {siblings.map((sib, i) => (
+                <span key={sib.id}>{i > 0 && ', '}<Link href={`/orders/${sib.id}`}>#{sib.order_number} {sib.plan_name}</Link></span>
+              ))}
+            </p>
+          )}
         </header>
 
         {deliveries.length > 0 && isPlan && <BoxTracker order={order} deliveries={deliveries} />}

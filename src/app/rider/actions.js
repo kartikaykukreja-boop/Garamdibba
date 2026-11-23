@@ -10,26 +10,40 @@ import { trackerCounts } from '../../lib/tracker.js'
 import { notify } from '../../lib/notify.js'
 import { slotLabel } from '../../lib/rules.js'
 import { SITE_URL } from '../../siteData.js'
+import { rateLimit } from '../../lib/rateLimit.js'
 
 const HANDOFF_RESULTS = ['customer', 'door', 'guard', 'contact']
 const WHERE = { customer: 'to you', door: 'at your door', guard: 'to the guard', contact: 'to your delivery contact' }
 
 async function riderDelivery(deliveryId) {
   const session = await actionSession()
-  if (!session || !['rider', 'admin'].includes(session.profile.role)) return { error: 'Not allowed.' }
+  if (!session || (session.profile.role !== 'rider' && !session.isAdmin)) return { error: 'Not allowed.' }
+  const limited = await rateLimit('rider', session.user.id)
+  if (limited) return { error: limited }
   const admin = createAdminClient()
   const { data: delivery } = await admin
     .from('deliveries')
     .select('*, order:orders(id, menu, bowl_choice, weekdays, lat, lng, customer_phone, meal, slot)')
     .eq('id', deliveryId)
     .maybeSingle()
-  if (!delivery || (delivery.rider_id !== session.user.id && session.profile.role !== 'admin')) {
+  if (!delivery || (delivery.rider_id !== session.user.id && !session.isAdmin)) {
     return { error: 'This delivery isn’t assigned to you.' }
   }
   if (['cancelled', 'delivered', 'skipped', 'missed', 'paused'].includes(delivery.status)) {
     return { error: 'This delivery is already closed.' }
   }
   return { session, admin, delivery }
+}
+
+// Location privacy: once a rider has nothing out for delivery, their last GPS point is deleted.
+async function forgetRiderLocationIfIdle(admin, riderId) {
+  if (!riderId) return
+  const { count } = await admin
+    .from('deliveries')
+    .select('id', { count: 'exact', head: true })
+    .eq('rider_id', riderId)
+    .eq('status', 'out_for_delivery')
+  if (!count) await admin.from('rider_locations').delete().eq('rider_id', riderId)
 }
 
 // Picked up: the customer's tracker goes live.
@@ -73,6 +87,7 @@ export async function markDelivered(formData) {
     .eq('id', deliveryId)
   if (updateError) return { error: 'Could not update. Please try again.' }
   await completeOrderIfDone(admin, delivery.order_id)
+  await forgetRiderLocationIfIdle(admin, delivery.rider_id)
 
   const { data: all } = await admin.from('deliveries').select('id, status, kind, delivery_date, meal, slot').eq('order_id', delivery.order_id)
   const t = trackerCounts(all ?? [])
@@ -96,6 +111,7 @@ export async function markMissed(deliveryId) {
   const next = await nextCreditSlot(admin, { ...delivery.order, id: delivery.order_id }, delivery.delivery_date, closed)
   const { error: rpcError } = await admin.rpc('make_up_delivery', { p_delivery_id: deliveryId, p_new_date: next.date, p_item: next.item })
   if (rpcError) return { error: 'Could not update. Please try again.' }
+  await forgetRiderLocationIfIdle(admin, delivery.rider_id)
   await notify('missed_delivery', {
     phone: delivery.order.customer_phone,
     date: formatDate(next.date),

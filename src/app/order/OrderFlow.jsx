@@ -31,6 +31,7 @@ import CutoffCountdown from '../../components/CutoffCountdown.jsx'
 import { mealPhrase, useNextOrderable } from '../../components/useNextOrderable.js'
 import LoginForm from '../login/LoginForm.jsx'
 import { ALLERGENS_VERIFIED, MENUS, MENU_ORDER, bowlAllergens, conflicts, dishFor, quoteOrder } from '../../lib/catalog.js'
+import { MAX_LINES, quoteBasket } from '../../lib/basket.js'
 import { addDays, canOrderFor, formatDate, friendlyDate, isOpenDay, todayIST, weekday } from '../../lib/dates.js'
 import { slotOptions } from '../../lib/slots.js'
 import {
@@ -63,7 +64,7 @@ const STEPS = [
   { id: 'meal', label: 'Meal' },
   { id: 'plan', label: 'Plan' },
   { id: 'schedule', label: 'When' },
-  { id: 'addons', label: 'Add-ons' },
+  { id: 'addons', label: 'Basket' },
   { id: 'details', label: 'Details' },
   { id: 'review', label: 'Pay' },
 ]
@@ -143,6 +144,10 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
   const [weekdays, setWeekdays] = useState(initial.weekdays?.length ? initial.weekdays : ALL_WEEKDAYS)
   const [slot, setSlot] = useState(initial.slot ?? saved?.defaultSlot ?? null)
   const [extras, setExtras] = useState({})
+  // The basket: finished meal lines. `editing` is the index of the line the Meal / Plan /
+  // When steps are editing (lines.length = a new line), or null when nothing is being edited.
+  const [lines, setLines] = useState([])
+  const [editing, setEditing] = useState(0)
   const [details, setDetails] = useState(() => emptyDetails(saved))
   const [signedIn, setSignedIn] = useState(Boolean(saved))
   const [company, setCompany] = useState(saved?.company ?? null)
@@ -172,6 +177,8 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
     if (draft.weekdays?.length) setWeekdays(draft.weekdays)
     if (draft.slot) setSlot(draft.slot)
     if (draft.extras) setExtras(draft.extras)
+    if (Array.isArray(draft.lines)) setLines(draft.lines.slice(0, MAX_LINES))
+    if (draft.editing === null || Number.isInteger(draft.editing)) setEditing(draft.editing)
     if (draft.details) setDetails((d) => ({ ...d, ...Object.fromEntries(Object.entries(draft.details).filter(([, v]) => v !== '' && v != null)) }))
     if (draft.step && STEPS.some((s) => s.id === draft.step)) setStep(draft.step === 'review' ? 'addons' : draft.step)
     /* eslint-enable react-hooks/set-state-in-effect */
@@ -179,8 +186,8 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
 
   useEffect(() => {
     if (!restored.current) return
-    writeDraft({ step, point, loc, menu, bowlSlug, planId, quantity, meal, startDate, weekdays, slot, extras, details })
-  }, [step, point, loc, menu, bowlSlug, planId, quantity, meal, startDate, weekdays, slot, extras, details])
+    writeDraft({ step, point, loc, menu, bowlSlug, planId, quantity, meal, startDate, weekdays, slot, extras, details, lines, editing })
+  }, [step, point, loc, menu, bowlSlug, planId, quantity, meal, startDate, weekdays, slot, extras, details, lines, editing])
 
   // Default meal and date follow the live cutoff: lunch → tonight's dinner → tomorrow's lunch.
   useEffect(() => {
@@ -193,31 +200,42 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
 
   // ── Derived values ─────────────────────────────────────────
   const plan = menu && planId ? MENUS[menu].plans.find((p) => p.id === planId) : null
-  const menuExtras = useMemo(() => extrasCatalog.filter((x) => !menu || x.menus.includes(menu)), [extrasCatalog, menu])
   const extrasList = useMemo(() => Object.entries(extras).filter(([, qty]) => qty > 0).map(([id, qty]) => ({ id, qty })), [extras])
+  // The line being edited (Meal / Plan / When steps).
   const quote = useMemo(
     () =>
       menu && planId && meal && startDate
-        ? quoteOrder({
-            menu,
-            planId,
-            quantity,
-            startDate,
-            weekdays,
-            meal,
-            bowlSlug,
-            allergies: details.allergies,
-            closed,
-            roadKm: loc.km ?? null,
-            extras: extrasList,
-            extrasCatalog: menuExtras,
-          })
+        ? quoteOrder({ menu, planId, quantity, startDate, weekdays, meal, bowlSlug, allergies: details.allergies, closed })
         : null,
-    [menu, planId, quantity, startDate, weekdays, meal, bowlSlug, details.allergies, closed, loc.km, extrasList, menuExtras],
+    [menu, planId, quantity, startDate, weekdays, meal, bowlSlug, details.allergies, closed],
+  )
+  const draftLine = useMemo(
+    () => ({ menu, planId, bowlSlug, quantity, meal, startDate, weekdays, slot }),
+    [menu, planId, bowlSlug, quantity, meal, startDate, weekdays, slot],
+  )
+  const draftReady = Boolean(menu && planId && meal && startDate && slot && quote && !quote.problem)
+  // Everything in the basket, including the line being edited once it's complete.
+  const basketLines = useMemo(() => {
+    const all = [...lines]
+    if (editing != null && draftReady) all[Math.min(editing, all.length)] = draftLine
+    return all
+  }, [lines, editing, draftReady, draftLine])
+  const basketMenus = useMemo(() => [...new Set([...basketLines.map((l) => l.menu), menu].filter(Boolean))], [basketLines, menu])
+  const menuExtras = useMemo(
+    () => extrasCatalog.filter((x) => !basketMenus.length || x.menus.some((m) => basketMenus.includes(m))),
+    [extrasCatalog, basketMenus],
+  )
+  const basket = useMemo(
+    () =>
+      basketLines.length
+        ? quoteBasket({ lines: basketLines, allergies: details.allergies, closed, roadKm: loc.km ?? null, extras: extrasList, extrasCatalog })
+        : null,
+    [basketLines, details.allergies, closed, loc.km, extrasList, extrasCatalog],
   )
   const firstDate = quote?.schedule[0]?.date ?? startDate
   const firstDish = menu && firstDate ? dishFor(menu, firstDate, bowlSlug) : null
-  const heroImage = menu ? (firstDish ? dishImage(menu, firstDish) : menuImages[menu]) : menuImages.north_indian
+  const lineImage = (line) => dishImage(line.menu, dishFor(line.menu, line.startDate, line.bowlSlug))
+  const heroImage = basketLines[0] ? lineImage(basketLines[0]) : menu ? (firstDish ? dishImage(menu, firstDish) : menuImages[menu]) : menuImages.north_indian
   const slots = useMemo(
     () => (meal && firstDate && next ? slotOptions({ meal, date: firstDate, roadKm: loc.km ?? null, load, now: next.now }) : []),
     [meal, firstDate, next, loc.km, load],
@@ -293,10 +311,73 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
   function continueFrom(current) {
     const problem = problemFor(current)
     if (problem) return setError(problem)
+    if (current === 'schedule') commitDraft()
+    if (current === 'addons' && !basketLines.length) return setError('Your basket is empty. Add a meal first.')
     const order = STEPS.map((s) => s.id)
     let target = order[order.indexOf(current) + 1]
     if (target === 'details' && detailsDone) target = 'review'
     go(target)
+  }
+
+  // Puts the line being edited into the basket.
+  function commitDraft() {
+    if (editing == null || !draftReady) return lines.length
+    const nextLines = [...lines]
+    nextLines[Math.min(editing, nextLines.length)] = draftLine
+    setLines(nextLines)
+    setEditing(null)
+    return nextLines.length
+  }
+
+  function loadLine(line) {
+    setMenu(line.menu)
+    setBowlSlug(line.bowlSlug ?? '')
+    setPlanId(line.planId)
+    setQuantity(line.quantity)
+    setMeal(line.meal)
+    setStartDate(line.startDate)
+    setWeekdays(line.weekdays?.length ? line.weekdays : ALL_WEEKDAYS)
+    setSlot(line.slot)
+  }
+
+  function editLine(index) {
+    if (editing != null && editing !== index) commitDraft()
+    loadLine(lines[index])
+    setEditing(index)
+    go('meal')
+  }
+
+  // "Add a Protein Bowl too": a new line, keeping the same day and slot as a starting point.
+  function addLine(menuId) {
+    const count = commitDraft()
+    if (count >= MAX_LINES) return setError(`You can order up to ${MAX_LINES} different meals at once.`)
+    setEditing(count)
+    setMenu(menuId)
+    setBowlSlug('')
+    setPlanId(null)
+    setQuantity(1)
+    setWeekdays(ALL_WEEKDAYS)
+    go('meal')
+  }
+
+  function removeLine(index) {
+    const nextLines = lines.filter((_, i) => i !== index)
+    setLines(nextLines)
+    if (!nextLines.length) {
+      setEditing(0)
+      setMenu(null)
+      setPlanId(null)
+      go('meal')
+    }
+  }
+
+  // Going back to Meal / Plan / When from the basket edits the last line.
+  function goStep(id) {
+    if (['meal', 'plan', 'schedule'].includes(id) && editing == null && lines.length) {
+      loadLine(lines[lines.length - 1])
+      setEditing(lines.length - 1)
+    }
+    go(id)
   }
 
   // Jump back only to steps already reachable.
@@ -324,24 +405,22 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
 
   // ── Pay ────────────────────────────────────────────────────
   async function pay() {
-    for (const id of ['location', 'meal', 'plan', 'schedule', 'details']) {
+    for (const id of ['location', 'details']) {
       const problem = problemFor(id)
       if (problem) {
         setError(problem)
         return go(id)
       }
     }
+    if (!basket || !basketLines.length) {
+      setError('Your basket is empty. Add a meal first.')
+      return goStep('meal')
+    }
+    if (basket.problem) return setError(basket.problem)
     setBusy(true)
     setError('')
     const result = await createOrder({
-      menu,
-      planId,
-      bowlSlug,
-      quantity,
-      meal,
-      slot,
-      startDate,
-      weekdays,
+      lines: basketLines,
       extras: extrasList,
       lat: point.lat,
       lng: point.lng,
@@ -390,8 +469,8 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
       ? busy
         ? 'Opening payment…'
         : payWith === 'company'
-          ? `Place order · ${rupees(quote?.total)}`
-          : `Pay ${rupees(quote?.total)}`
+          ? `Place order · ${rupees(basket?.total)}`
+          : `Pay ${rupees(basket?.total)}`
       : step === 'addons' && !extrasList.length
         ? 'No add-ons, continue'
         : 'Continue'
@@ -417,7 +496,7 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
               className={`${s.id === step ? 'is-current' : ''} ${done ? 'is-done' : ''}`}
               aria-current={s.id === step ? 'step' : undefined}
               disabled={!reachable || busy}
-              onClick={() => go(s.id)}
+              onClick={() => goStep(s.id)}
             >
               <span>{done ? <Check size={12} aria-hidden="true" /> : i + 1}</span>
               {s.label}
@@ -484,7 +563,6 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
                           setMenu(id)
                           setPlanId(null)
                           setBowlSlug('')
-                          setExtras({})
                         }
                       }}
                     >
@@ -668,17 +746,49 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
             </section>
           )}
 
-          {/* 5 · Add-ons */}
+          {/* 5 · Basket and add-ons */}
           {step === 'addons' && (
             <section className="app-card of-step">
-              <h2 className="of-title">Anything with that?</h2>
+              <h2 className="of-title">Your basket</h2>
+              <ul className="of-basket">
+                {basket?.lines.map((line, i) => (
+                  <li key={i}>
+                    <span className="of-basket-photo"><Image src={lineImage(line)} alt="" fill sizes="96px" placeholder="blur" /></span>
+                    <span className="of-basket-copy">
+                      <strong>{MENUS[line.menu].name}{line.quote.bowl ? `: ${line.quote.bowl.name}` : ''}</strong>
+                      <small>
+                        {line.quote.plan.boxes === 1 ? 'Single meal' : line.quote.plan.name}{line.quantity > 1 ? ` × ${line.quantity}` : ''}
+                        {' · '}{MEALS[line.meal].label} {friendlyDate(line.quote.schedule[0].date, next?.now)}, {slotLabel(line.meal, line.slot)}
+                      </small>
+                      <span className="of-basket-actions">
+                        <button type="button" className="app-linkbutton" onClick={() => editLine(i)}>Edit</button>
+                        <button type="button" className="app-linkbutton app-danger" onClick={() => removeLine(i)}>Remove</button>
+                      </span>
+                    </span>
+                    <b>{rupees(line.quote.mealsTotal)}</b>
+                  </li>
+                ))}
+              </ul>
+              {basketLines.length < MAX_LINES && (
+                <div className="of-addmore">
+                  {MENU_ORDER.filter((id) => !basketLines.some((l) => l.menu === id)).map((id) => (
+                    <button key={id} type="button" className={`of-addmore-card ${id === 'protein_bowl' ? 'is-bowls' : ''}`} onClick={() => addLine(id)}>
+                      <span className="of-addmore-photo"><Image src={menuImages[id]} alt="" fill sizes="72px" placeholder="blur" /></span>
+                      <span><b>+ Add {id === 'protein_bowl' ? 'a Protein Bowl' : 'an Everyday Dabba'} too</b><small>Same delivery, one payment{loc.far ? ', one delivery fee' : ''}.</small></span>
+                    </button>
+                  ))}
+                  <button type="button" className="app-linkbutton" onClick={() => addLine(menu ?? 'north_indian')}>+ Add another meal</button>
+                </div>
+              )}
+
+              <h2 className="of-title of-title-gap">Anything with that?</h2>
               <p className="app-muted">Optional. Nothing is added unless you tap it. Add-ons come with your first {unit}.</p>
               <ExtrasRow title="From our kitchen" items={menuExtras.filter((x) => x.kind === 'food')} extras={extras} setExtras={setExtras} />
               <ExtrasRow title="Thanda chahiye?" note="Something cold, packed chilled away from your hot dibba." items={menuExtras.filter((x) => x.kind === 'drink')} extras={extras} setExtras={setExtras} />
               <ExtrasRow title="Kuch meetha ho jaaye?" note="Something sweet." items={menuExtras.filter((x) => x.kind === 'sweet')} extras={extras} setExtras={setExtras} />
               {!menuExtras.length && <p className="app-muted">No add-ons available right now.</p>}
-              {quote && FREE_DELIVERY_ORDER_VALUE != null && quote.perDeliveryFee > 0 && !quote.waivedByPlan && (
-                <FreeDeliveryBar value={quote.mealsTotal + quote.extrasTotal} target={FREE_DELIVERY_ORDER_VALUE} />
+              {basket && FREE_DELIVERY_ORDER_VALUE != null && basket.chargedDrops > 0 && (
+                <FreeDeliveryBar value={basket.mealsTotal + basket.extrasTotal} target={FREE_DELIVERY_ORDER_VALUE} />
               )}
             </section>
           )}
@@ -699,36 +809,53 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
           )}
 
           {/* 8 · Review and pay */}
-          {step === 'review' && quote && (
+          {step === 'review' && basket && (
             <section className="app-card of-step of-review">
               <div className="of-review-hero">
-                <Image src={heroImage} alt={firstDish?.name ?? ''} fill sizes="(max-width: 900px) 100vw, 640px" placeholder="blur" />
+                <Image src={heroImage} alt="" fill sizes="(max-width: 900px) 100vw, 640px" placeholder="blur" />
                 <span>
-                  <small>{MENUS[menu].name}</small>
-                  <strong>{quote.bowl ? quote.bowl.name : quote.plan.boxes === 1 ? firstDish?.name : `${quote.plan.name.replace(' Plan', '')} plan`}</strong>
+                  <small>{basket.lines.length > 1 ? `${basket.lines.length} meals, one payment` : MENUS[basket.lines[0].menu].name}</small>
+                  <strong>{basket.lines.map((l) => (l.quote.bowl ? l.quote.bowl.name : MENUS[l.menu].name)).join(' + ')}</strong>
                 </span>
               </div>
               <h2 className="of-title">Review and pay</h2>
 
               <ul className="of-lines">
-                <li>
-                  <span>{MENUS[menu].name} · {quote.plan.boxes === 1 ? 'single meal' : quote.plan.name}{quantity > 1 ? ` × ${quantity}` : ''}<small>{quote.plan.boxes} × {rupees(quote.plan.price)}{quantity > 1 ? ` × ${quantity}` : ''}</small></span>
-                  <b>{rupees(quote.mealsTotal)}</b>
-                </li>
-                {quote.extras.map((x) => (
+                {basket.lines.map((line, i) => (
+                  <li key={i}>
+                    <span>
+                      {MENUS[line.menu].name}{line.quote.bowl ? `: ${line.quote.bowl.name}` : ''} · {line.quote.plan.boxes === 1 ? 'single meal' : line.quote.plan.name}{line.quantity > 1 ? ` × ${line.quantity}` : ''}
+                      <small>
+                        {line.quote.plan.boxes} × {rupees(line.quote.plan.price)}{line.quantity > 1 ? ` × ${line.quantity}` : ''} · {MEALS[line.meal].label}, {slotLabel(line.meal, line.slot)} · from {friendlyDate(line.quote.schedule[0].date, next?.now)}
+                        {line.quote.schedule.length > 1 && <>, last box {formatDate(line.quote.endDate)}, use by {formatDate(line.quote.validUntil)}</>}
+                      </small>
+                    </span>
+                    <b>{rupees(line.quote.mealsTotal)}</b>
+                  </li>
+                ))}
+                {basket.extras.map((x) => (
                   <li key={x.id}><span>{x.name}{x.qty > 1 ? ` × ${x.qty}` : ''}</span><b>{rupees(x.total)}</b></li>
                 ))}
                 <li>
-                  <span>Delivery<small>{loc.km} km{quote.perDeliveryFee > 0 ? (quote.feeWaived ? ' · free on this plan' : ` · ${rupees(quote.perDeliveryFee)} × ${quote.schedule.length}`) : ' · free up to 3 km'}</small></span>
-                  <b>{quote.deliveryFee ? rupees(quote.deliveryFee) : 'Free'}</b>
+                  <span>
+                    Delivery
+                    <small>
+                      {loc.km} km
+                      {basket.perDeliveryFee > 0
+                        ? basket.chargedDrops
+                          ? ` · ${rupees(basket.perDeliveryFee)} × ${basket.chargedDrops} ${basket.chargedDrops === 1 ? 'trip' : 'trips'}${basket.feeWaived ? ' (rest free on your plan)' : ''}`
+                          : ' · free on your plan'
+                        : ' · free up to 3 km'}
+                    </small>
+                  </span>
+                  <b>{basket.deliveryFee ? rupees(basket.deliveryFee) : 'Free'}</b>
                 </li>
-                {quote.savings > 0 && <li className="of-line-save"><span>You save vs single meals</span><b>{rupees(quote.savings)}</b></li>}
-                <li className="of-line-total"><span>Total{PRICES_INCLUDE_GST ? <small>Inclusive of GST</small> : <small>No hidden or extra charges</small>}</span><b>{rupees(quote.total)}</b></li>
+                {basket.savings > 0 && <li className="of-line-save"><span>You save vs single meals</span><b>{rupees(basket.savings)}</b></li>}
+                <li className="of-line-total"><span>Total{PRICES_INCLUDE_GST ? <small>Inclusive of GST</small> : <small>No hidden or extra charges</small>}</span><b>{rupees(basket.total)}</b></li>
               </ul>
+              {basket.problem && <p className="app-alert app-alert-error"><TriangleAlert size={16} aria-hidden="true" /> {basket.problem}</p>}
 
               <dl className="of-facts">
-                <div><dt>Credits</dt><dd>{quote.schedule.length} {quote.schedule.length === 1 ? 'meal' : 'meals'}{quantity > 1 ? ` × ${quantity}` : ''} · last box {formatDate(quote.endDate)}{quote.schedule.length > 1 && <> · use by {formatDate(quote.validUntil)}</>}</dd></div>
-                <div><dt>When</dt><dd>{MEALS[meal].label}, {friendlyDate(firstDate, next?.now)} · {slotLabel(meal, slot)}</dd></div>
                 <div><dt>Where</dt><dd>{details.addressLine}{details.landmark && `, near ${details.landmark}`}</dd></div>
                 <div><dt>If we can’t reach you</dt><dd>{HANDOFFS.find((h) => h.id === details.handoff)?.label} <button type="button" className="app-linkbutton" onClick={() => go('details')}>Change</button></dd></div>
                 {details.allergies.length > 0 && <div><dt>Allergies</dt><dd className="of-allergy">{details.allergies.map((a) => ALLERGENS.find((x) => x.id === a)?.label).join(', ')}</dd></div>}
@@ -763,7 +890,7 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
 
           <div className="of-nav">
             {stepIndex > 0 && (
-              <button type="button" className="button button-outline" onClick={() => go(STEPS[stepIndex - 1].id)} disabled={busy}>
+              <button type="button" className="button button-outline" onClick={() => goStep(STEPS[stepIndex - 1].id)} disabled={busy}>
                 <ArrowLeft size={18} aria-hidden="true" /> Back
               </button>
             )}
@@ -771,10 +898,10 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
 
           <div className="of-bar">
             <div className="of-bar-total">
-              {quote ? (
+              {basket ? (
                 <>
-                  <strong>{rupees(quote.total)}</strong>
-                  <small>{quote.schedule.length > 1 ? `${quote.schedule.length} meals` : '1 meal'}{quote.deliveryFee ? ' + delivery' : ' · free delivery'}</small>
+                  <strong>{rupees(basket.total)}</strong>
+                  <small>{basket.meals === 1 ? '1 meal' : `${basket.meals} meals`}{basket.deliveryFee ? ' + delivery' : ' · free delivery'}</small>
                 </>
               ) : (
                 <small>{STEPS[stepIndex].label}: step {stepIndex + 1} of {STEPS.length}</small>
@@ -799,20 +926,31 @@ export default function OrderFlow({ kitchen, radiusKm, closed, extrasCatalog, sa
           <div className="of-summary-photo">
             <Image src={heroImage} alt="" fill sizes="320px" placeholder="blur" />
           </div>
-          <p className="of-summary-title">{menu ? MENUS[menu].name : 'Your dibba'}</p>
-          {plan ? (
+          <p className="of-summary-title">{basket ? 'Your basket' : menu ? MENUS[menu].name : 'Your dibba'}</p>
+          {basket ? (
+            <ul className="of-summary-list">
+              {basket.lines.map((line, i) => (
+                <li key={i}>
+                  {line.menu === 'protein_bowl' ? <Soup size={14} aria-hidden="true" /> : <UtensilsCrossed size={14} aria-hidden="true" />}
+                  <span>
+                    {line.quote.bowl ? line.quote.bowl.name : MENUS[line.menu].name} · {line.quote.plan.boxes === 1 ? 'single' : line.quote.plan.name}{line.quantity > 1 ? ` × ${line.quantity}` : ''}
+                    <br /><small>{MEALS[line.meal].label}, {friendlyDate(line.quote.schedule[0].date, next?.now)} · {slotLabel(line.meal, line.slot)}</small>
+                  </span>
+                </li>
+              ))}
+              {basket.extras.length > 0 && <li><Plus size={14} aria-hidden="true" />{basket.extras.map((x) => x.name).join(', ')}</li>}
+              {loc.status === 'ok' && <li><Truck size={14} aria-hidden="true" />{basket.deliveryFee ? `${rupees(basket.deliveryFee)} delivery` : 'Free delivery'}</li>}
+            </ul>
+          ) : plan ? (
             <ul className="of-summary-list">
               <li><UtensilsCrossed size={14} aria-hidden="true" />{plan.boxes === 1 ? 'Single meal' : plan.name}{quantity > 1 ? ` × ${quantity}` : ''}</li>
-              {quote?.bowl && <li><Soup size={14} aria-hidden="true" />{quote.bowl.name}</li>}
               {meal && firstDate && <li><CalendarDays size={14} aria-hidden="true" />{MEALS[meal].label}, {friendlyDate(firstDate, next?.now)}{slot && ` · ${slotLabel(meal, slot)}`}</li>}
-              {extrasList.length > 0 && <li><Plus size={14} aria-hidden="true" />{quote?.extras.map((x) => x.name).join(', ')}</li>}
-              {loc.status === 'ok' && <li><Truck size={14} aria-hidden="true" />{quote?.deliveryFee ? `${rupees(quote.deliveryFee)} delivery` : 'Free delivery'}</li>}
             </ul>
           ) : (
             <p className="app-muted">Pick a meal and plan to see your total.</p>
           )}
-          {quote && <p className="of-summary-total"><span>Total</span><strong>{rupees(quote.total)}</strong></p>}
-          {quote?.savings > 0 && <p className="of-save">You save {rupees(quote.savings)}</p>}
+          {basket && <p className="of-summary-total"><span>Total</span><strong>{rupees(basket.total)}</strong></p>}
+          {basket?.savings > 0 && <p className="of-save">You save {rupees(basket.savings)}</p>}
         </aside>
       </div>
 

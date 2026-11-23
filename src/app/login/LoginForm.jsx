@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getBrowserClient } from '../../lib/supabase/browser.js'
+import { safeNextPath } from '../../lib/safeRedirect.js'
 
 // onSignedIn: when given (e.g. inside the order flow), stay on the page instead of redirecting.
-export default function LoginForm({ next, onSignedIn }) {
+export default function LoginForm({ next: nextRaw, onSignedIn }) {
+  const next = safeNextPath(nextRaw, '/order')
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')

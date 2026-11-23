@@ -5,6 +5,7 @@ import { actionSession } from '../../lib/auth.js'
 import { createAdminClient } from '../../lib/supabase/server.js'
 import { makeJoinCode } from '../../lib/codes.js'
 import { createRazorpayOrder, razorpayKeyId } from '../../lib/razorpay.js'
+import { rateLimit } from '../../lib/rateLimit.js'
 
 const MIN_TOPUP = 500
 const MAX_TOPUP = 500000
@@ -84,6 +85,8 @@ export async function removeMember(formData) {
 export async function startTopup(amountInput) {
   const session = await actionSession()
   if (!session?.profile.company_id || session.profile.company_role !== 'hr') return { error: 'Only HR can add money.' }
+  const limited = await rateLimit('topup', session.user.id)
+  if (limited) return { error: limited }
   const amount = money(amountInput)
   if (!amount || Number.isNaN(amount) || amount < MIN_TOPUP || amount > MAX_TOPUP) {
     return { error: `Enter an amount between ₹${MIN_TOPUP} and ₹${MAX_TOPUP.toLocaleString('en-IN')}.` }

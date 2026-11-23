@@ -109,8 +109,7 @@ insert into public.extras (id, name, kind, price, mrp, stock, menus, note, sort)
   ('sweet-of-day', 'Sweet of the day',      'food',  40, null, null, '{north_indian,protein_bowl}', null,            50),
   ('extra-paneer', 'Extra paneer',          'food',  50, null, null, '{north_indian,protein_bowl}', '+50 g paneer',  60),
   ('diet-coke',    'Diet Coke',             'drink', 40, 40,   24,   '{north_indian,protein_bowl}', '300 ml can',    70),
-  ('diet-pepsi',   'Diet Pepsi',            'drink', 40, 40,   24,   '{north_indian,protein_bowl}', '300 ml can',    80),
-  ('nimbooz',      'Nimbooz',               'drink', 20, 20,   24,   '{north_indian,protein_bowl}', '250 ml',        90),
+  ('sprite',       'Sprite',                'drink', 40, 40,   24,   '{north_indian,protein_bowl}', '300 ml can',    80),
   ('dairy-milk',   'Cadbury Dairy Milk',    'sweet', 20, 20,   30,   '{north_indian,protein_bowl}', null,           100),
   ('kitkat',       'KitKat',                'sweet', 20, 20,   30,   '{north_indian,protein_bowl}', null,           110)
 on conflict (id) do nothing;

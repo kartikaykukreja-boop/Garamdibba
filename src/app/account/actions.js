@@ -8,10 +8,12 @@ import { clean, normalisePhone } from '../../lib/validate.js'
 import { isValidPoint } from '../../lib/geo.js'
 import { roadDistance } from '../../lib/distance.js'
 import { ALLERGENS, HANDOFFS, MAX_DELIVERY_KM, PREFERENCES } from '../../lib/rules.js'
+import { rateLimit } from '../../lib/rateLimit.js'
 
 async function signedIn() {
   const session = await actionSession()
   if (!session) redirect('/login?next=/account')
+  if (await rateLimit('profile', session.user.id)) redirect('/account?err=rate')
   return session
 }
 
@@ -28,6 +30,7 @@ export async function updateProfile(formData) {
 export async function joinCompany(formData) {
   const { user, profile } = await signedIn()
   if (profile.company_id) redirect('/account?err=already')
+  if (await rateLimit('joinCompany', user.id)) redirect('/account?err=rate')
   const code = clean(formData.get('code'), 12).toUpperCase().replace(/\s/g, '')
   const admin = createAdminClient()
   const { data: company } = await admin.from('companies').select('id, active').eq('join_code', code).maybeSingle()
@@ -107,6 +110,8 @@ export async function updatePreferences(formData) {
 export async function savePin({ lat, lng }) {
   const session = await actionSession()
   if (!session) return { error: 'Please sign in again.' }
+  const limited = await rateLimit('profile', session.user.id)
+  if (limited) return { error: limited }
   const point = { lat: Number(lat), lng: Number(lng) }
   if (!isValidPoint(point)) return { error: 'Please drop a pin on the map.' }
   const road = await roadDistance(point)

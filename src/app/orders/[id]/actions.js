@@ -9,6 +9,7 @@ import { loadClosedDates, nextCreditSlot, uploadPhoto } from '../../../lib/order
 import { notify } from '../../../lib/notify.js'
 import { MEALS, REPORT_REASONS, REPORT_WINDOW_MINUTES } from '../../../lib/rules.js'
 import { clean } from '../../../lib/validate.js'
+import { rateLimit } from '../../../lib/rateLimit.js'
 
 const UUID = /^[0-9a-f-]{36}$/i
 
@@ -16,9 +17,10 @@ async function ownOrder(orderId) {
   const session = await actionSession()
   if (!session) redirect(`/login?next=/orders/${orderId}`)
   if (!UUID.test(orderId)) redirect('/orders')
+  if (await rateLimit('planChange', session.user.id)) redirect(`/orders/${orderId}?err=rate`)
   const admin = createAdminClient()
   const { data: order } = await admin.from('orders').select('*').eq('id', orderId).maybeSingle()
-  if (!order || (order.user_id !== session.user.id && session.profile.role !== 'admin')) redirect('/orders')
+  if (!order || (order.user_id !== session.user.id && !session.isAdmin)) redirect('/orders')
   return { session, admin, order }
 }
 
@@ -112,6 +114,7 @@ export async function reportBox(formData) {
   const deliveryId = String(formData.get('delivery_id'))
   const reason = String(formData.get('reason'))
   const { admin, session } = await ownOrder(orderId)
+  if (await rateLimit('report', session.user.id)) back(orderId, 'err=rate')
   if (!REPORT_REASONS.some((r) => r.id === reason)) back(orderId, 'err=report_reason')
   const { data: d } = await admin.from('deliveries').select('*').eq('id', deliveryId).eq('order_id', orderId).maybeSingle()
   if (!d || !['delivered', 'out_for_delivery'].includes(d.status)) back(orderId, 'err=generic')

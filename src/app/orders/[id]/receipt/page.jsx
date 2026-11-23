@@ -12,10 +12,11 @@ export const metadata = { title: 'Receipt | Garam Dibba', robots: { index: false
 // Printable receipt. Becomes a tax invoice once a GSTIN is set (NEXT_PUBLIC_GSTIN).
 export default async function ReceiptPage({ params }) {
   const { id } = await params
-  const { user, profile } = await requireSession(`/orders/${id}/receipt`)
+  const session = await requireSession(`/orders/${id}/receipt`)
+  const { user } = session
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound()
   const { data: o } = await createAdminClient().from('orders').select('*').eq('id', id).maybeSingle()
-  if (!o || (o.user_id !== user.id && profile.role !== 'admin') || o.status === 'pending_payment') notFound()
+  if (!o || (o.user_id !== user.id && !session.isAdmin) || o.status === 'pending_payment') notFound()
 
   const extras = Array.isArray(o.extras) ? o.extras : []
   const mealsTotal = o.meals_total ?? o.total - (o.delivery_fee ?? 0) - (o.extras_total ?? 0)

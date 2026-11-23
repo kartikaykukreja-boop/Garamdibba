@@ -70,14 +70,21 @@ export async function nextCreditSlot(admin, order, notBefore, closed) {
 }
 
 // ── Proof photos (private "proofs" bucket) ──────────────────────────────
+// JPEG, PNG or WebP only (no SVG/HTML, which could carry scripts).
+function imageType(b) {
+  if (b.length > 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg'
+  if (b.length > 8 && b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png'
+  if (b.length > 12 && b.toString('ascii', 0, 4) === 'RIFF' && b.toString('ascii', 8, 12) === 'WEBP') return 'image/webp'
+  return null
+}
 export async function uploadPhoto(admin, path, file) {
   if (!file || typeof file.arrayBuffer !== 'function' || !file.size) return null
   if (file.size > 4 * 1024 * 1024) return null
-  const type = /^image\/(jpeg|png|webp)$/.test(file.type) ? file.type : 'image/jpeg'
-  const { error } = await admin.storage.from('proofs').upload(path, Buffer.from(await file.arrayBuffer()), {
-    contentType: type,
-    upsert: true,
-  })
+  const bytes = Buffer.from(await file.arrayBuffer())
+  // Trust the file's actual bytes, not its name or the browser's MIME type.
+  const type = imageType(bytes)
+  if (!type) return null
+  const { error } = await admin.storage.from('proofs').upload(path, bytes, { contentType: type, upsert: true })
   if (error) {
     console.error('photo upload failed', error)
     return null

@@ -3,12 +3,11 @@ import { connection } from 'next/server'
 import { getSession } from '../../lib/auth.js'
 import { supabaseConfigured } from '../../lib/supabase/server.js'
 import LoginForm from './LoginForm.jsx'
+import { safeNextPath } from '../../lib/safeRedirect.js'
 
 export const metadata = { title: 'Sign in | Garam Dibba', robots: { index: false } }
 
-function safeNext(value) {
-  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : '/order'
-}
+const safeNext = (value) => safeNextPath(value, '/order')
 
 export default async function LoginPage({ searchParams }) {
   await connection()

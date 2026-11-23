@@ -7,6 +7,9 @@ import { completeOrderIfDone, statusPatch } from '../../lib/orders.js'
 import { isValidYmd, todayIST } from '../../lib/dates.js'
 import { loadClosedDates, nextCreditSlot } from '../../lib/orderData.js'
 import { clean } from '../../lib/validate.js'
+import { EVENTS, logEvent } from '../../lib/securityLog.js'
+import { rateLimit } from '../../lib/rateLimit.js'
+import { safeNextPath } from '../../lib/safeRedirect.js'
 
 const STATUSES = ['scheduled', 'preparing', 'out_for_delivery', 'delivered', 'cancelled', 'paused']
 const ROLES = ['customer', 'rider', 'admin']
@@ -14,12 +17,18 @@ const ROLES = ['customer', 'rider', 'admin']
 async function adminSession() {
   const session = await actionSession()
   if (!session) redirect('/login?next=/admin')
-  if (session.profile.role !== 'admin') redirect('/account?denied=1')
+  if (session.needsMfa) redirect('/account/security?next=/admin')
+  if (!session.isAdmin) {
+    await logEvent(EVENTS.ADMIN_DENIED, { userId: session.user.id, detail: { via: 'admin action' } })
+    redirect('/account?denied=1')
+  }
+  const limited = await rateLimit('admin', session.user.id)
+  if (limited) redirect('/admin?err=generic')
   return session
 }
 
 function back(formData, extra = '') {
-  const target = String(formData.get('back') || '/admin')
+  const target = safeNextPath(String(formData.get('back') || '/admin'), '/admin')
   const safe = target.startsWith('/admin') ? target : '/admin'
   return `${safe}${safe.includes('?') ? '&' : '?'}${extra}`
 }
@@ -39,7 +48,7 @@ export async function assignRider(formData) {
 }
 
 export async function setDeliveryStatus(formData) {
-  await adminSession()
+  const { user } = await adminSession()
   const status = String(formData.get('status'))
   if (!STATUSES.includes(status)) redirect(back(formData, 'err=generic'))
   const admin = createAdminClient()
@@ -50,6 +59,7 @@ export async function setDeliveryStatus(formData) {
     .select('order_id')
     .maybeSingle()
   if (delivery && ['delivered', 'cancelled'].includes(status)) await completeOrderIfDone(admin, delivery.order_id)
+  await logEvent(EVENTS.DELIVERY_STATUS_SET, { userId: user.id, detail: { delivery: String(formData.get('delivery_id')), status } })
   redirect(back(formData, 'msg=saved'))
 }
 
@@ -78,12 +88,14 @@ export async function bulkPreparing(formData) {
 }
 
 export async function cancelOrder(formData) {
-  await adminSession()
-  const { data: refund, error } = await createAdminClient().rpc('cancel_order', { p_order_id: String(formData.get('order_id')) })
+  const { user } = await adminSession()
+  const orderId = String(formData.get('order_id'))
+  const { data: refund, error } = await createAdminClient().rpc('cancel_order', { p_order_id: orderId })
   if (error) {
     console.error('cancel_order failed', error)
     redirect(back(formData, 'err=generic'))
   }
+  await logEvent(EVENTS.ORDER_CANCELLED, { userId: user.id, detail: { order: orderId, refund: Number(refund ?? 0) } })
   redirect(back(formData, `msg=cancelled&refund=${Number(refund ?? 0)}`))
 }
 
@@ -98,6 +110,9 @@ export async function adjustWallet(formData) {
     p_note: note,
     p_admin: user.id,
   })
+  if (!error) {
+    await logEvent(EVENTS.WALLET_ADJUSTED, { userId: user.id, detail: { company: String(formData.get('company_id')), amount, note } })
+  }
   // A debit larger than the balance fails the wallet_balance >= 0 check.
   redirect(back(formData, error ? 'err=balance' : 'msg=wallet'))
 }
@@ -117,7 +132,11 @@ export async function setUserRole(formData) {
   const userId = String(formData.get('user_id'))
   if (!ROLES.includes(role)) redirect(back(formData, 'err=generic'))
   if (userId === user.id && role !== 'admin') redirect(back(formData, 'err=self'))
-  await createAdminClient().from('profiles').update({ role }).eq('id', userId)
+  const admin = createAdminClient()
+  const { data: before } = await admin.from('profiles').select('role').eq('id', userId).maybeSingle()
+  if (!before) redirect(back(formData, 'err=generic'))
+  await admin.from('profiles').update({ role }).eq('id', userId)
+  await logEvent(EVENTS.ROLE_CHANGED, { userId: user.id, detail: { target: userId, from: before.role, to: role } })
   redirect(back(formData, 'msg=saved'))
 }
 
@@ -156,7 +175,19 @@ export async function resolveReport(formData) {
     .maybeSingle()
   if (!report || report.status !== 'open') redirect(back(formData, 'err=generic'))
 
-  if (outcome === 'make_up' && !(await bookMakeUp(admin, report.delivery_id))) redirect(back(formData, 'err=generic'))
+  // Claim the report first, so two clicks (or two admins) can't refund or re-book twice.
+  const { data: claimed } = await admin
+    .from('delivery_reports')
+    .update({ status: outcome, resolved_by: user.id, resolved_at: new Date().toISOString() })
+    .eq('id', report.id)
+    .eq('status', 'open')
+    .select('id')
+  if (!claimed?.length) redirect(back(formData, 'err=generic'))
+
+  if (outcome === 'make_up' && !(await bookMakeUp(admin, report.delivery_id))) {
+    await admin.from('delivery_reports').update({ status: 'open', resolved_by: null, resolved_at: null }).eq('id', report.id)
+    redirect(back(formData, 'err=generic'))
+  }
   if (outcome === 'refund') {
     const amount = Math.round((Number(report.order.total) / report.order.boxes) * 100) / 100
     if (report.order.payment_method === 'company') {
@@ -165,17 +196,15 @@ export async function resolveReport(formData) {
       await admin.from('orders').update({ refund_due: Number(report.order.refund_due ?? 0) + amount }).eq('id', report.order.id)
     }
   }
-  await admin
-    .from('delivery_reports')
-    .update({ status: outcome, resolution_note: clean(formData.get('note'), 300) || null, resolved_by: user.id, resolved_at: new Date().toISOString() })
-    .eq('id', report.id)
+  await admin.from('delivery_reports').update({ resolution_note: clean(formData.get('note'), 300) || null }).eq('id', report.id)
+  await logEvent(EVENTS.REPORT_RESOLVED, { userId: user.id, detail: { report: report.id, outcome } })
   redirect(back(formData, `msg=report_${outcome}`))
 }
 
 // ── Catalog: add-ons and closed dates ───────────────────────────────────
 
 export async function saveExtra(formData) {
-  await adminSession()
+  const { user } = await adminSession()
   const num = (key) => {
     const raw = String(formData.get(key) ?? '').trim()
     if (raw === '') return null
@@ -188,10 +217,15 @@ export async function saveExtra(formData) {
   if (price == null || Number.isNaN(price) || Number.isNaN(mrp) || Number.isNaN(stock)) redirect(back(formData, 'err=extra'))
   // Packaged goods can't be sold above MRP.
   if (mrp != null && price > mrp) redirect(back(formData, 'err=mrp'))
-  await createAdminClient()
+  const admin = createAdminClient()
+  const id = String(formData.get('id'))
+  const { data: before } = await admin.from('extras').select('price').eq('id', id).maybeSingle()
+  if (!before) redirect(back(formData, 'err=generic'))
+  await admin
     .from('extras')
     .update({ price, mrp, stock: stock == null ? null : Math.trunc(stock), active: formData.get('active') === 'on', updated_at: new Date().toISOString() })
-    .eq('id', String(formData.get('id')))
+    .eq('id', id)
+  if (Number(before.price) !== price) await logEvent(EVENTS.PRICE_CHANGED, { userId: user.id, detail: { extra: id, from: Number(before.price), to: price } })
   redirect(back(formData, 'msg=saved'))
 }
 
