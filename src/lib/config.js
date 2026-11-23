@@ -7,9 +7,10 @@ function num(value, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback
 }
 
+// Kitchen: A7, IT Park, Sahastradhara Road, Dehradun.
 export const KITCHEN = {
-  lat: num(process.env.NEXT_PUBLIC_KITCHEN_LAT, 30.3165),
-  lng: num(process.env.NEXT_PUBLIC_KITCHEN_LNG, 78.0322),
+  lat: num(process.env.NEXT_PUBLIC_KITCHEN_LAT, 30.3616),
+  lng: num(process.env.NEXT_PUBLIC_KITCHEN_LNG, 78.0854),
 }
 
 // Orders are only accepted for addresses within this straight-line distance of the kitchen.

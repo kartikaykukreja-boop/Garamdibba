@@ -44,7 +44,7 @@ export default function HomePage() {
           </div>
           <div className="hero-meta" aria-label="Service highlights">
             <span><CalendarDays size={18} /> Monday–Saturday</span>
-            <span><IndianRupee size={18} /> From ₹120/box</span>
+            <span><IndianRupee size={18} /> From ₹125/box</span>
             <span><Sparkles size={18} /> 8 protein bowls</span>
           </div>
         </div>
@@ -131,7 +131,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="section bowls-section">
+      <section className="section bowls-section theme-bowls">
         <div className="shell">
           <div className="section-heading heading-row">
             <div>
@@ -162,12 +162,12 @@ export default function HomePage() {
           <div className="mobile-plan-options">
             <Link href="/meal-plans#protein-bowl-plans">
               <Sparkles aria-hidden="true" />
-              <span><strong>Protein bowl plans</strong><small>From ₹130 per bowl</small></span>
+              <span><strong>Protein bowl plans</strong><small>From ₹135 per bowl</small></span>
               <ArrowRight aria-hidden="true" />
             </Link>
             <Link href="/meal-plans#plans">
               <Utensils aria-hidden="true" />
-              <span><strong>North Indian plans</strong><small>From ₹120 per box</small></span>
+              <span><strong>North Indian plans</strong><small>From ₹125 per box</small></span>
               <ArrowRight aria-hidden="true" />
             </Link>
           </div>

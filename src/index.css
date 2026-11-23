@@ -14,7 +14,13 @@
   --paper: #f7eae5;
   --peach: #ecc5ba;
   --ink: #4b1c17;
-  --green: #365b3b;
+  /* Protein Bowls sub-brand (Colour & Type System, No. 09) */
+  --leaf: #3f5e3a;
+  --leaf-deep: #2a3f27;
+  --mint: #eef0e6;
+  /* Functional only: the vegetarian mark. Never a brand colour. */
+  --veg: #2e7d32;
+  --green: var(--leaf);
 }
 
 * {

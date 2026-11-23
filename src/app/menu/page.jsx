@@ -12,6 +12,7 @@ import {
   PageHero,
   PlanGrid,
   ProteinBowlProgram,
+  ProteinBowlsHeading,
 } from '../../site.jsx'
 import { bowlImages, photos } from '../../images.js'
 import { plans } from '../../siteData.js'
@@ -78,11 +79,11 @@ export default function MenuPage() {
       <div className="menu-switch-zone">
         <MenuSwitchBar />
 
-        <section className="menu-section shell anchor-section menu-anchor" id="protein-bowls">
+        <section className="menu-section shell anchor-section menu-anchor theme-bowls" id="protein-bowls">
           <div className="active-week-heading">
             <div>
               <span className="menu-number">Menu 1 of 2</span>
-              <h2>Protein Bowls</h2>
+              <ProteinBowlsHeading />
             </div>
             <span className="veg-badge"><span>●</span> Vegetarian menu</span>
           </div>

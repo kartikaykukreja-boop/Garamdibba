@@ -9,6 +9,7 @@ import {
   PageHero,
   PlanGrid,
   ProteinBowlProgram,
+  ProteinBowlsHeading,
 } from '../../site.jsx'
 import { dehradunFaqs } from '../../siteData.js'
 import { bowlImages } from '../../images.js'
@@ -37,13 +38,13 @@ export default function MealPlansPage() {
         </p>
       </PageHero>
 
-      <section className="section shell protein-plans-page anchor-section" id="protein-bowl-plans">
+      <section className="section shell protein-plans-page anchor-section theme-bowls" id="protein-bowl-plans">
         <div className="active-week-heading">
           <div>
             <span className="menu-number">Plan menu 1 of 2</span>
-            <h2>Protein Bowl Plans</h2>
+            <ProteinBowlsHeading title="Bowl Plans" />
           </div>
-          <span className="veg-badge"><span>●</span> 8 bowls to choose from</span>
+          <span className="veg-badge"><span>●</span> Vegetarian · 8 bowls</span>
         </div>
         <ProteinBowlProgram />
       </section>
@@ -79,8 +80,8 @@ export default function MealPlansPage() {
             <p>With delivery Monday to Saturday, Garam Dibba is built around making everyday meals easier to manage.</p>
             <ul className="check-list">
               <li><Repeat /> Daily tiffin: the 1-Day Plan at ₹180/box</li>
-              <li><CalendarDays /> Weekly tiffin: the 1-Week Plan at ₹135/box</li>
-              <li><Package /> Monthly tiffin: the 4-Week Plan at ₹120/box</li>
+              <li><CalendarDays /> Weekly tiffin: the 1-Week Plan at ₹140/box</li>
+              <li><Package /> Monthly tiffin: the 4-Week Plan at ₹125/box</li>
             </ul>
             <a className="text-link" href="#plans">View All Plans <ArrowRight size={18} /></a>
           </div>

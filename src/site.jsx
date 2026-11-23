@@ -63,6 +63,31 @@ export function OrderButton({ className = '', message, children = 'Order on What
   )
 }
 
+// Protein Bowls sub-brand icon: a bowl with paneer and three steam lines (line art, one colour).
+export function BowlIcon(props) {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M18 3.5c-1.8 2.2 1.8 4.1 0 6.6M24.2 3c-1.8 2.2 1.8 4.1 0 6.6M30.4 3.5c-1.8 2.2 1.8 4.1 0 6.6" />
+      <path d="M15.6 22.6l1.1-5.4 5.3 1.2-1 5.1M24.4 22.8l2.2-4.6 4.8 2.1-1.2 2.7" />
+      <path d="M5.8 23.4c12.3-.6 24.2-.5 36.4.2-.4 8.9-7.7 14.6-18.1 14.6S6.3 32.4 5.8 23.4z" />
+      <path d="M17.6 42.4c4.3-.5 8.5-.5 12.9.1" />
+    </svg>
+  )
+}
+
+// "Protein Bowls" sub-brand heading: icon, then Protein (handwritten) over Bowls.
+export function ProteinBowlsHeading({ as: Tag = 'h2', title = 'Bowls' }) {
+  return (
+    <Tag className="subbrand-heading">
+      <BowlIcon />
+      <span>
+        <small>Protein</small>
+        <strong>{title}</strong>
+      </span>
+    </Tag>
+  )
+}
+
 // Opens online ordering. plan / bowl preselect that choice on the order page.
 export function OrderOnlineButton({ className = '', plan, bowl, children = 'Order online' }) {
   const query = new URLSearchParams(Object.entries({ plan, bowl }).filter(([, v]) => v)).toString()
@@ -193,20 +218,22 @@ export function HeroMosaic({ className = '' }) {
   )
 }
 
-export function PlanGrid({ items = plans }) {
+// unit: 'box' for North Indian lunch, 'bowl' for protein bowls.
+export function PlanGrid({ items = plans, unit = 'box' }) {
+  const units = unit === 'box' ? 'boxes' : `${unit}s`
   return (
     <div className={items.length === 4 ? 'plan-grid plan-grid-four' : 'plan-grid'}>
       {items.map((plan) => (
         <article className={plan.best ? 'plan-card is-best' : 'plan-card'} key={plan.id}>
-          {plan.best && <span className="plan-badge">Lowest per-box price</span>}
+          {plan.best && <span className="plan-badge">Best value</span>}
           <h3>{plan.name}</h3>
           <p className="plan-price">
             <span>₹{plan.price}</span>
-            <small>/box</small>
+            <small>/{unit}</small>
           </p>
           {plan.boxes && (
             <p className="plan-total">
-              <span>{plan.boxes} {plan.boxes === 1 ? 'box' : 'boxes'}</span>
+              <span>{plan.boxes} {plan.boxes === 1 ? unit : units}</span>
               <strong>₹{plan.total.toLocaleString('en-IN')} total</strong>
             </p>
           )}
@@ -265,7 +292,7 @@ export function ProteinBowlProgram({ showPlans = true }) {
             <h3>Choose Your Protein Bowl Plan</h3>
             <p className="section-sub">These prices apply to protein bowls and are separate from the North Indian lunch plans.</p>
           </div>
-          <PlanGrid items={proteinBowlPlans} />
+          <PlanGrid items={proteinBowlPlans} unit="bowl" />
           <div className="plans-foot">
             <p>
               <CalendarDays size={18} aria-hidden="true" />

@@ -201,7 +201,7 @@ export default function DehradunPage() {
         </div>
       </section>
 
-      <section className="section bowls-section">
+      <section className="section bowls-section theme-bowls">
         <div className="shell">
           <div className="section-heading heading-row">
             <div>

@@ -21,30 +21,22 @@ export const DELIVERY_AREAS = []
 export const plans = [
   { id: '1-day', name: '1-Day Plan', short: '1-Day', price: 180, boxes: 1, total: 180, note: 'Need a meal for today? Start here.' },
   { id: '3-day', name: '3-Day Plan', short: '3-Day', price: 150, boxes: 3, total: 450, note: 'Try a few different meals.' },
-  { id: '1-week', name: '1-Week Plan', short: '1-Week', price: 135, boxes: 6, total: 810, note: 'Six boxes, Monday to Saturday.' },
-  { id: '2-week', name: '2-Week Plan', short: '2-Week', price: 130, boxes: 12, total: 1560, note: 'Planning a little further ahead.' },
-  { id: '4-week', name: '4-Week Plan', short: '4-Week', price: 120, boxes: 24, total: 2880, note: 'A longer-term tiffin routine.', best: true },
+  { id: '1-week', name: '1-Week Plan', short: '1-Week', price: 140, boxes: 6, total: 840, note: 'Six boxes, Monday to Saturday.' },
+  { id: '2-week', name: '2-Week Plan', short: '2-Week', price: 135, boxes: 12, total: 1620, note: 'Planning a little further ahead.' },
+  { id: '4-week', name: '4-Week Plan', short: '4-Week', price: 125, boxes: 24, total: 3000, note: 'A longer-term tiffin routine.', best: true },
 ]
 
 export const proteinBowlPlans = [
   { id: 'bowl-1-day', name: '1-Day Plan', short: '1 Day', price: 180, boxes: 1, total: 180, note: 'One protein bowl.' },
   { id: 'bowl-3-day', name: '3-Day Plan', short: '3 Days', price: 160, boxes: 3, total: 480, note: 'Three bowls across three delivery days.' },
   { id: 'bowl-1-week', name: '1-Week Plan', short: '1 Week', price: 145, boxes: 6, total: 870, note: 'Six bowls, Monday to Saturday.' },
-  { id: 'bowl-2-week', name: '2-Week Plan', short: '2 Weeks', price: 130, boxes: 12, total: 1560, note: 'Twelve bowls across two weeks.', best: true },
+  { id: 'bowl-2-week', name: '2-Week Plan', short: '2 Weeks', price: 135, boxes: 12, total: 1620, note: 'Twelve bowls across two weeks.', best: true },
 ]
 
 export const bowls = [
   {
-    slug: 'hot-and-sour-paneer',
-    name: 'Hot & Sour Paneer Bowl',
-    style: 'Modern flavours',
-    protein: 26,
-    blurb: 'Paneer and vegetables in a bold hot-and-sour sauce, served with rice and spring onion.',
-    alt: 'Hot and Sour Paneer Bowl with paneer, vegetables, rice and spring onion',
-  },
-  {
     slug: 'tandoori-malai-paneer',
-    name: 'Tandoori Malai Paneer',
+    name: 'Tandoori Malai Paneer Bowl',
     style: 'Indian favourite',
     protein: 26,
     blurb: 'Char-grilled paneer with a creamy, mildly spiced sauce, mushrooms and greens.',
@@ -52,7 +44,7 @@ export const bowls = [
   },
   {
     slug: 'pindi-chole',
-    name: 'Pindi Chole',
+    name: 'Pindi Chole Bowl',
     style: 'Indian favourite',
     protein: 26,
     blurb: 'Deep, robustly spiced chickpeas with rice, pickled onion and ginger.',
@@ -60,7 +52,7 @@ export const bowls = [
   },
   {
     slug: 'paneer-lababdar',
-    name: 'Paneer Lababdar',
+    name: 'Paneer Lababdar Bowl',
     style: 'Indian favourite',
     protein: 26,
     blurb: 'Soft paneer in a rich, chunky onion-tomato gravy, served with rice.',
@@ -73,14 +65,6 @@ export const bowls = [
     protein: 30,
     blurb: 'Spiced paneer with peppers, black beans and corn, finished with a creamy drizzle.',
     alt: 'Tex-Mex bowl with spiced paneer, peppers, black beans, corn and a creamy drizzle beside rice',
-  },
-  {
-    slug: 'paneer-pasanda',
-    name: 'Paneer Pasanda Bowl',
-    style: 'Indian favourite',
-    protein: 26,
-    blurb: 'Paneer in a rich, creamy onion-tomato gravy, served with fragrant rice and pickled onion.',
-    alt: 'Paneer Pasanda Bowl with paneer in creamy gravy, rice and pickled onion',
   },
   {
     slug: 'pesto-paneer',
@@ -98,15 +82,31 @@ export const bowls = [
     blurb: 'Glossy, sweet-spicy Korean-style paneer with peppers, onion and sesame.',
     alt: 'Korean Paneer bowl with glossy paneer, peppers, red onion, sesame and spring onion beside rice',
   },
+  {
+    slug: 'paneer-pasanda',
+    name: 'Paneer Pasanda Bowl',
+    style: 'Indian favourite',
+    protein: 26,
+    blurb: 'Paneer in a rich, creamy onion-tomato gravy, served with fragrant rice and pickled onion.',
+    alt: 'Paneer Pasanda Bowl with paneer in creamy gravy, rice and pickled onion',
+  },
+  {
+    slug: 'hot-and-sour-paneer',
+    name: 'Hot & Sour Paneer Bowl',
+    style: 'Modern flavours',
+    protein: 26,
+    blurb: 'Paneer and vegetables in a bold hot-and-sour sauce, served with rice and spring onion.',
+    alt: 'Hot and Sour Paneer Bowl with paneer, vegetables, rice and spring onion',
+  },
 ].map((bowl) => ({ ...bowl, image: `/bowls/${bowl.slug}.jpg` }))
 
 export const proteinBowlRotation = [
-  { day: 'Monday', bowl: 'Hot & Sour Paneer Bowl' },
-  { day: 'Tuesday', bowl: 'Pindi Chole' },
-  { day: 'Wednesday', bowl: 'Paneer Pasanda Bowl' },
+  { day: 'Monday', bowl: 'Tandoori Malai Paneer Bowl' },
+  { day: 'Tuesday', bowl: 'Pindi Chole Bowl' },
+  { day: 'Wednesday', bowl: 'Paneer Lababdar Bowl' },
   { day: 'Thursday', bowl: 'Tex-Mex Bowl' },
   { day: 'Friday', bowl: 'Pesto Paneer Bowl' },
-  { day: 'Saturday', bowl: 'Paneer Lababdar' },
+  { day: 'Saturday', bowl: 'Korean Paneer Bowl' },
 ]
 
 export const bowlNames = bowls.map((bowl) => bowl.name)
@@ -145,7 +145,7 @@ export const dehradunFaqs = [
   },
   {
     q: 'How much does Garam Dibba cost?',
-    a: 'Protein bowl plans run from ₹130 to ₹180 per box. The separate North Indian lunch plans run from ₹120 to ₹180 per box.',
+    a: 'Protein bowl plans run from ₹135 to ₹180 per bowl. The separate North Indian lunch plans run from ₹125 to ₹180 per box.',
   },
   {
     q: 'Do you offer daily tiffin?',
@@ -187,7 +187,7 @@ export const businessSchema = {
   email: CONTACT_EMAIL,
   image: `${SITE_URL}/bowls/paneer-lababdar.jpg`,
   servesCuisine: ['Indian', 'North Indian', 'Vegetarian'],
-  priceRange: '₹120–₹180 per box',
+  priceRange: '₹125–₹180 per box',
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Dehradun',
@@ -222,7 +222,7 @@ export const pageMeta = {
   '/meal-plans': {
     title: 'Tiffin Plans & Prices in Dehradun | Garam Dibba',
     description:
-      'Compare separate protein bowl and North Indian lunch plans in Dehradun, with delivery Monday to Saturday and protein bowl plans from ₹130 per box.',
+      'Compare separate protein bowl and North Indian lunch plans in Dehradun, with delivery Monday to Saturday and protein bowl plans from ₹135 per bowl.',
   },
   '/tiffin-delivery-dehradun': {
     title: 'Tiffin Delivery in Dehradun | Garam Dibba',

@@ -906,9 +906,9 @@ h3 {
   gap: 8px;
   margin-bottom: 10px;
   padding: 8px 12px;
-  border: 1px solid rgba(54, 91, 59, 0.45);
+  border: 1px solid rgba(46, 125, 50, 0.45);
   border-radius: 999px;
-  color: var(--green);
+  color: var(--veg);
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -3670,4 +3670,208 @@ h3 {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ==========================================================
+   Protein Bowls sub-brand (Colour & Type System, No. 09)
+   Green leads: Curry Leaf field or Mint Cream ground, lots of room.
+   Mustard = protein. Red is a sign-off only. Quieter graphics.
+   Add .theme-bowls to any protein-bowl section: the shared colour
+   tokens are remapped, so cards, plans and buttons follow along.
+   ========================================================== */
+
+.theme-bowls {
+  --red: var(--leaf);
+  --masala: var(--leaf-deep);
+  --cream: #f8f9f3;
+  --paper: var(--mint);
+  --peach: #d7decb;
+  --ink: var(--leaf-deep);
+  --soft-text: rgba(42, 63, 39, 0.74);
+  --hairline: rgba(42, 63, 39, 0.18);
+
+  color: var(--ink);
+  background: var(--mint);
+}
+
+/* Constrained (.shell) sections still paint the green edge to edge. */
+.theme-bowls.shell {
+  box-shadow: 0 0 0 100vmax var(--mint);
+  clip-path: inset(0 -100vmax);
+}
+
+.theme-bowls ::selection {
+  color: var(--mint);
+  background: var(--leaf-deep);
+}
+
+.theme-bowls .section-sub,
+.theme-bowls .protein-program-heading p,
+.theme-bowls .bowl-card-body > p,
+.theme-bowls .plan-note,
+.theme-bowls .plan-total,
+.theme-bowls .plan-price small,
+.theme-bowls.plans-light .plans-foot p,
+.theme-bowls .plans-light .plans-foot p,
+.theme-bowls .north-strip {
+  color: var(--soft-text);
+}
+
+/* Lighter lines and calmer hovers: bowls feel airy, not busy. */
+.theme-bowls .bowl-card,
+.theme-bowls .rotation-grid li,
+.theme-bowls .plan-card {
+  border-color: var(--hairline);
+}
+
+.theme-bowls .plan-total,
+.theme-bowls .protein-plan-block {
+  border-color: var(--hairline);
+}
+
+.theme-bowls .bowl-card:hover,
+.theme-bowls .plan-card:hover,
+.theme-bowls .bowl-tile:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 34px rgba(42, 63, 39, 0.16);
+}
+
+.theme-bowls .bowl-tile {
+  border-color: var(--leaf-deep);
+  background: var(--leaf-deep);
+}
+
+.theme-bowls .bowl-tile-caption {
+  background: linear-gradient(180deg, rgba(26, 40, 24, 0) 0%, rgba(26, 40, 24, 0.86) 72%);
+}
+
+.theme-bowls .bowl-tile-caption strong {
+  color: var(--mint);
+}
+
+.theme-bowls .bowl-card figure {
+  background: var(--leaf-deep);
+}
+
+.theme-bowls .bowl-style {
+  color: var(--leaf-deep);
+  background: var(--mint);
+}
+
+/* 26g in mustard on a Deep Leaf band. */
+.theme-bowls .protein-badge {
+  border-color: var(--leaf-deep);
+  color: var(--mint);
+  background: var(--leaf-deep);
+  box-shadow: none;
+  transform: none;
+}
+
+.theme-bowls .protein-badge strong {
+  color: var(--mustard);
+}
+
+.theme-bowls .rotation-badge {
+  border-color: var(--leaf-deep);
+  color: var(--mustard);
+  background: var(--leaf-deep);
+}
+
+.theme-bowls .rotation-number {
+  color: rgba(63, 94, 58, 0.14);
+}
+
+/* Build-your-own panel: a Curry Leaf field with cream text. */
+.theme-bowls .custom-weekly-menu {
+  border-color: var(--leaf);
+  color: var(--mint);
+  background: var(--leaf);
+  box-shadow: none;
+}
+
+.theme-bowls .custom-weekly-menu p {
+  color: rgba(238, 240, 230, 0.82);
+}
+
+.theme-bowls .custom-weekly-menu .menu-number {
+  color: var(--mustard);
+  background: var(--leaf-deep);
+}
+
+.theme-bowls .custom-bowl-list li {
+  border-color: rgba(238, 240, 230, 0.32);
+  color: var(--mint);
+  background: rgba(238, 240, 230, 0.08);
+}
+
+/* Best-value plan: Curry Leaf card, mustard badge on Deep Leaf. */
+.theme-bowls .plan-card.is-best {
+  border-color: var(--leaf);
+  color: var(--mint);
+  background: var(--leaf);
+  box-shadow: none;
+}
+
+.theme-bowls .plan-card.is-best .plan-price,
+.theme-bowls .plan-card.is-best .plan-total strong {
+  color: var(--mint);
+}
+
+.theme-bowls .plan-card.is-best .plan-price small,
+.theme-bowls .plan-card.is-best .plan-note,
+.theme-bowls .plan-card.is-best .plan-total {
+  border-color: rgba(238, 240, 230, 0.24);
+  color: rgba(238, 240, 230, 0.78);
+}
+
+.theme-bowls .plan-card.is-best .menu-order-link {
+  color: var(--mustard);
+}
+
+.theme-bowls .plan-badge {
+  border-color: var(--leaf-deep);
+  color: var(--mustard);
+  background: var(--leaf-deep);
+}
+
+.theme-bowls .north-strip-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* Sub-brand heading: bowl icon + "Protein" (Kalam) + "Bowls" (Baloo 2). */
+.subbrand-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+.subbrand-heading svg {
+  width: clamp(48px, 6vw, 68px);
+  height: auto;
+  flex: 0 0 auto;
+  color: var(--leaf-deep);
+}
+
+.subbrand-heading > span {
+  display: flex;
+  flex-direction: column;
+  padding-left: 16px;
+  border-left: 1.5px solid var(--hairline, rgba(42, 63, 39, 0.18));
+}
+
+.subbrand-heading small {
+  color: var(--leaf);
+  font-family: 'Kalam', cursive;
+  font-size: 0.42em;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.subbrand-heading strong {
+  font-weight: 800;
+  line-height: 0.95;
 }
