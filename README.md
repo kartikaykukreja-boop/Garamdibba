@@ -35,7 +35,7 @@ Ordering uses Supabase (database, email login, realtime) and Razorpay (payments)
    - SQL Editor → New query → paste all of `supabase/schema.sql` → Run.
    - Authentication → Sign In / Providers → Email: keep enabled.
    - Authentication → Emails → "Magic Link" template: add `Your code: {{ .Token }}`
-     so the email contains the 6-digit code (the link keeps working too).
+     so the email contains the 8-digit code (the link keeps working too).
    - Authentication → URL Configuration: Site URL `https://garamdibba.com`, and add
      `https://garamdibba.com/auth/callback` and `http://localhost:3000/auth/callback` to Redirect URLs.
    - For real traffic, set up custom SMTP (Authentication → Emails → SMTP, e.g. Resend or

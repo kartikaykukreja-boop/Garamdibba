@@ -50,7 +50,7 @@ export default function LoginForm({ next }) {
           We sent a code to <strong>{email}</strong>. Enter it below, or tap the link in the email.
         </p>
         <label className="app-field">
-          <span>6-digit code</span>
+          <span>8-digit code</span>
           <input
             inputMode="numeric"
             autoComplete="one-time-code"

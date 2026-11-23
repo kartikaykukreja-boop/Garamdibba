@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }) {
           <p className="eyebrow">Sign in</p>
           <h1 className="app-title">Order, pay and track your dibba</h1>
           <p className="app-muted">
-            We’ll email you a 6-digit code. No password needed. New here? The same code creates your account.
+            We’ll email you an 8-digit code. No password needed. New here? The same code creates your account.
           </p>
           {params.error && <p className="app-alert app-alert-error">That sign-in link didn’t work. Please request a new code.</p>}
           <LoginForm next={next} />
