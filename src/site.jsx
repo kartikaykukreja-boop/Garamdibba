@@ -25,6 +25,7 @@ import {
   whatsappHref,
 } from './siteData.js'
 import { bowlImages, photos } from './images.js'
+import { BUSINESS } from './lib/rules.js'
 
 const founderStory = [
   'Garam Dibba started with something very close to my heart, my children. When both of them left for college, I often found myself wondering what they would eat and whether they would get the kind of food they were used to having at home. That thought stayed with me, and it made me realise how much we all miss a simple, familiar meal when we are away from home.',
@@ -517,6 +518,11 @@ export function SiteFooter() {
           <BrandMark />
           <p>Ghar ka khana. Tiffin mein.</p>
           <span>Vegetarian tiffin service in Dehradun.</span>
+          <address className="footer-legal">
+            <span>Kitchen: {BUSINESS.kitchenAddress}</span>
+            {BUSINESS.fssai && <span>FSSAI Lic. No. {BUSINESS.fssai}</span>}
+            {BUSINESS.gstin && <span>GSTIN {BUSINESS.gstin}</span>}
+          </address>
         </div>
         <div className="footer-links">
           <p>Explore</p>
@@ -539,6 +545,13 @@ export function SiteFooter() {
           <a href={PHONE_HREF}>{CONTACT_PHONE_DISPLAY}</a>
           <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
           <span>Monday–Saturday</span>
+        </div>
+        <div className="footer-links">
+          <p>Policies</p>
+          <Link href="/refund-policy">Refund &amp; cancellation</Link>
+          <Link href="/delivery-policy">Delivery policy</Link>
+          <Link href="/terms">Terms of service</Link>
+          <Link href="/privacy">Privacy policy</Link>
         </div>
       </div>
       <div className="shell footer-bottom">

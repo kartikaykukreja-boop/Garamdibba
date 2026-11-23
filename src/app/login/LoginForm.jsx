@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getBrowserClient } from '../../lib/supabase/browser.js'
 
-export default function LoginForm({ next }) {
+// onSignedIn: when given (e.g. inside the order flow), stay on the page instead of redirecting.
+export default function LoginForm({ next, onSignedIn }) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
@@ -37,6 +38,11 @@ export default function LoginForm({ next }) {
     if (verifyError) {
       setBusy(false)
       setError('That code is wrong or has expired. Check the latest email, or send a new code.')
+      return
+    }
+    if (onSignedIn) {
+      setBusy(false)
+      onSignedIn()
       return
     }
     router.replace(next)

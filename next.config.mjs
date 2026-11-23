@@ -4,6 +4,13 @@ const nextConfig = {
   turbopack: {
     root: import.meta.dirname,
   },
+  // Rider proof photos and "Didn't get my box?" photos are uploaded through server actions.
+  // Vercel caps request bodies at 4.5 MB.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '4mb',
+    },
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     qualities: [75, 85],

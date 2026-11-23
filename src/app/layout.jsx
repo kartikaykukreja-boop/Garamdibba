@@ -6,6 +6,8 @@ import { SITE_URL, businessSchema } from '../siteData.js'
 import '../index.css'
 import '../App.css'
 import '../portal.css'
+import '../policy.css'
+import '../order-flow.css'
 
 const GTM_ID = 'GTM-TGC3CS7R'
 

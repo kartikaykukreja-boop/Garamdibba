@@ -6,7 +6,7 @@ import RiderConsole from './RiderConsole.jsx'
 
 export const metadata = { title: 'Rider | Garam Dibba', robots: { index: false } }
 
-const ORDER = { out_for_delivery: 0, preparing: 1, scheduled: 2, delivered: 3, cancelled: 4 }
+const ORDER = { out_for_delivery: 0, preparing: 1, scheduled: 2, delivered: 3, missed: 4 }
 
 export default async function RiderPage() {
   const { user, profile } = await requireRole(['rider', 'admin'], '/rider')
@@ -14,12 +14,12 @@ export default async function RiderPage() {
 
   const { data } = await createAdminClient()
     .from('deliveries')
-    .select('id, status, item_name, quantity, delivered_at, order:orders(order_number, customer_name, customer_phone, address_line, address_landmark, lat, lng, notes)')
+    .select('id, status, item_name, quantity, delivered_at, meal, slot, kind, extras, order_id, order:orders(order_number, customer_name, customer_phone, address_line, address_landmark, lat, lng, notes, handoff, delivery_note, delivery_contact, allergies)')
     .eq('rider_id', user.id)
     .eq('delivery_date', today)
-    .neq('status', 'cancelled')
+    .in('status', ['scheduled', 'preparing', 'out_for_delivery', 'delivered', 'missed'])
 
-  const deliveries = (data ?? []).sort((a, b) => ORDER[a.status] - ORDER[b.status])
+  const deliveries = (data ?? []).sort((a, b) => ORDER[a.status] - ORDER[b.status] || (a.slot ?? '').localeCompare(b.slot ?? ''))
 
   return (
     <main className="app-page">

@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { Mail, MapPin, MessageCircle, Phone } from 'lucide-react'
+import { Mail, MapPin, MessageCircle, Navigation, Phone } from 'lucide-react'
 import { CallToAction, Eyebrow, OrderButton, PageHero } from '../../site.jsx'
 import {
   CHECK_DELIVERY_MESSAGE,
@@ -9,6 +9,9 @@ import {
 } from '../../siteData.js'
 import { bowlImages, photos } from '../../images.js'
 import { buildMetadata } from '../../metadata.js'
+import { BUSINESS } from '../../lib/rules.js'
+
+const KITCHEN_DIRECTIONS = 'https://www.google.com/maps/dir/?api=1&destination=30.365015,78.088288'
 
 export const metadata = buildMetadata('/contact')
 
@@ -65,6 +68,15 @@ export default function ContactPage() {
               <MapPin />
               <span>
                 <strong>Delivery</strong> — Dehradun, Monday to Saturday. Ask us whether your area is covered.
+              </span>
+            </li>
+            <li>
+              <Navigation />
+              <span>
+                <strong>Kitchen</strong> — {BUSINESS.kitchenAddress}.{' '}
+                <a className="text-link" href={KITCHEN_DIRECTIONS} target="_blank" rel="noreferrer">
+                  Get directions
+                </a>
               </span>
             </li>
           </ul>

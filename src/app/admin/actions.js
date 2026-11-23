@@ -4,10 +4,11 @@ import { redirect } from 'next/navigation'
 import { actionSession } from '../../lib/auth.js'
 import { createAdminClient } from '../../lib/supabase/server.js'
 import { completeOrderIfDone, statusPatch } from '../../lib/orders.js'
-import { isValidYmd } from '../../lib/dates.js'
+import { isValidYmd, todayIST } from '../../lib/dates.js'
+import { loadClosedDates, nextCreditSlot } from '../../lib/orderData.js'
 import { clean } from '../../lib/validate.js'
 
-const STATUSES = ['scheduled', 'preparing', 'out_for_delivery', 'delivered', 'cancelled']
+const STATUSES = ['scheduled', 'preparing', 'out_for_delivery', 'delivered', 'cancelled', 'paused']
 const ROLES = ['customer', 'rider', 'admin']
 
 async function adminSession() {
@@ -117,5 +118,93 @@ export async function setUserRole(formData) {
   if (!ROLES.includes(role)) redirect(back(formData, 'err=generic'))
   if (userId === user.id && role !== 'admin') redirect(back(formData, 'err=self'))
   await createAdminClient().from('profiles').update({ role }).eq('id', userId)
+  redirect(back(formData, 'msg=saved'))
+}
+
+// ── Missed deliveries and "Didn't get my box?" reports ──────────────────
+
+async function bookMakeUp(admin, deliveryId) {
+  const { data: d } = await admin
+    .from('deliveries')
+    .select('id, delivery_date, order:orders(id, menu, bowl_choice, weekdays)')
+    .eq('id', deliveryId)
+    .maybeSingle()
+  if (!d) return false
+  const closed = await loadClosedDates(admin)
+  const next = await nextCreditSlot(admin, d.order, d.delivery_date > todayIST() ? d.delivery_date : todayIST(), closed)
+  const { data, error } = await admin.rpc('make_up_delivery', { p_delivery_id: d.id, p_new_date: next.date, p_item: next.item })
+  if (error) console.error('make_up_delivery failed', error)
+  return Boolean(data)
+}
+
+// We failed to deliver: credit kept, make-up box booked.
+export async function markMissedAdmin(formData) {
+  await adminSession()
+  const ok = await bookMakeUp(createAdminClient(), String(formData.get('delivery_id')))
+  redirect(back(formData, ok ? 'msg=makeup' : 'err=generic'))
+}
+
+export async function resolveReport(formData) {
+  const { user } = await adminSession()
+  const outcome = String(formData.get('outcome'))
+  if (!['make_up', 'refund', 'rejected'].includes(outcome)) redirect(back(formData, 'err=generic'))
+  const admin = createAdminClient()
+  const { data: report } = await admin
+    .from('delivery_reports')
+    .select('id, status, delivery_id, order:orders(id, total, boxes, payment_method, company_id, refund_due)')
+    .eq('id', String(formData.get('report_id')))
+    .maybeSingle()
+  if (!report || report.status !== 'open') redirect(back(formData, 'err=generic'))
+
+  if (outcome === 'make_up' && !(await bookMakeUp(admin, report.delivery_id))) redirect(back(formData, 'err=generic'))
+  if (outcome === 'refund') {
+    const amount = Math.round((Number(report.order.total) / report.order.boxes) * 100) / 100
+    if (report.order.payment_method === 'company') {
+      await admin.rpc('adjust_company_wallet', { p_company_id: report.order.company_id, p_amount: amount, p_note: 'Refund for a missed box', p_admin: user.id })
+    } else {
+      await admin.from('orders').update({ refund_due: Number(report.order.refund_due ?? 0) + amount }).eq('id', report.order.id)
+    }
+  }
+  await admin
+    .from('delivery_reports')
+    .update({ status: outcome, resolution_note: clean(formData.get('note'), 300) || null, resolved_by: user.id, resolved_at: new Date().toISOString() })
+    .eq('id', report.id)
+  redirect(back(formData, `msg=report_${outcome}`))
+}
+
+// ── Catalog: add-ons and closed dates ───────────────────────────────────
+
+export async function saveExtra(formData) {
+  await adminSession()
+  const num = (key) => {
+    const raw = String(formData.get(key) ?? '').trim()
+    if (raw === '') return null
+    const n = Number(raw)
+    return Number.isFinite(n) && n >= 0 ? n : NaN
+  }
+  const price = num('price')
+  const mrp = num('mrp')
+  const stock = num('stock')
+  if (price == null || Number.isNaN(price) || Number.isNaN(mrp) || Number.isNaN(stock)) redirect(back(formData, 'err=extra'))
+  // Packaged goods can't be sold above MRP.
+  if (mrp != null && price > mrp) redirect(back(formData, 'err=mrp'))
+  await createAdminClient()
+    .from('extras')
+    .update({ price, mrp, stock: stock == null ? null : Math.trunc(stock), active: formData.get('active') === 'on', updated_at: new Date().toISOString() })
+    .eq('id', String(formData.get('id')))
+  redirect(back(formData, 'msg=saved'))
+}
+
+export async function addClosedDate(formData) {
+  await adminSession()
+  const date = String(formData.get('date'))
+  if (!isValidYmd(date)) redirect(back(formData, 'err=generic'))
+  await createAdminClient().from('closed_dates').upsert({ date, reason: clean(formData.get('reason'), 120) || null })
+  redirect(back(formData, 'msg=closed'))
+}
+
+export async function removeClosedDate(formData) {
+  await adminSession()
+  await createAdminClient().from('closed_dates').delete().eq('date', String(formData.get('date')))
   redirect(back(formData, 'msg=saved'))
 }

@@ -2,12 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CircleCheck, MapPin, Navigation, Phone, Radio } from 'lucide-react'
+import { Camera, CircleCheck, CupSoda, MapPin, Navigation, Phone, Radio, TriangleAlert, X } from 'lucide-react'
 import { getBrowserClient } from '../../lib/supabase/browser.js'
 import { RIDER_PING_MS } from '../../lib/config.js'
+import { distanceKm } from '../../lib/geo.js'
+import { HANDOFFS, PROOF_MAX_DISTANCE_M, allergenTicket, slotLabel } from '../../lib/rules.js'
 import { DELIVERY_STATUS } from '../../lib/status.js'
 import StatusPill from '../../components/StatusPill.jsx'
-import { setRiderStatus } from './actions.js'
+import { markDelivered, markMissed, startDelivery } from './actions.js'
 
 // Shares the rider's GPS with customers while this page is open.
 // Browsers pause GPS when the screen locks, so we ask to keep the screen awake.
@@ -71,6 +73,102 @@ function useLocationSharing(riderId) {
   return { sharing, info, start, stop }
 }
 
+// Shrinks a phone photo to ~1280 px JPEG so it uploads quickly on mobile data.
+async function compress(file) {
+  if (!file || !file.type.startsWith('image/')) return null
+  try {
+    const bitmap = await createImageBitmap(file)
+    const scale = Math.min(1, 1280 / Math.max(bitmap.width, bitmap.height))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.round(bitmap.width * scale)
+    canvas.height = Math.round(bitmap.height * scale)
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.72))
+    return blob ? new File([blob], 'proof.jpg', { type: 'image/jpeg' }) : file
+  } catch {
+    return file
+  }
+}
+
+function currentPosition() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(null)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 15000 },
+    )
+  })
+}
+
+// What the customer's saved choice means at the door.
+const EXPECTED = { call_then_guard: 'guard', call_then_door: 'door', door: 'door', guard: 'guard' }
+
+// Proof of delivery: where it was left, GPS, time and a photo of the box.
+function DeliverPanel({ delivery, onDone }) {
+  const o = delivery.order
+  const [result, setResult] = useState('customer')
+  const [photo, setPhoto] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const options = [
+    ['customer', 'To customer'],
+    ['door', 'At door'],
+    ['guard', 'With guard'],
+    ...(o.delivery_contact ? [['contact', 'To contact']] : []),
+  ]
+
+  async function submit() {
+    setBusy(true)
+    setError('')
+    const here = await currentPosition()
+    if (here) {
+      const metres = Math.round(distanceKm(here, { lat: o.lat, lng: o.lng }) * 1000)
+      if (metres > PROOF_MAX_DISTANCE_M && !window.confirm(`You are about ${metres} m from the customer’s pin. Mark delivered anyway?`)) {
+        setBusy(false)
+        return
+      }
+    }
+    const form = new FormData()
+    form.set('delivery_id', delivery.id)
+    form.set('handoff', result)
+    if (here) {
+      form.set('lat', String(here.lat))
+      form.set('lng', String(here.lng))
+    }
+    const small = await compress(photo)
+    if (small) form.set('photo', small)
+    const response = await markDelivered(form)
+    setBusy(false)
+    if (response.error) return setError(response.error)
+    onDone()
+  }
+
+  return (
+    <div className="deliver-panel">
+      <div className="app-segment" role="radiogroup" aria-label="Where did you leave it?">
+        {options.map(([id, label]) => (
+          <button key={id} type="button" role="radio" aria-checked={result === id} className={result === id ? 'is-active' : ''} onClick={() => setResult(id)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      {result !== 'customer' && o.handoff && EXPECTED[o.handoff] !== result && (
+        <p className="app-hint"><TriangleAlert size={14} aria-hidden="true" /> Customer asked: {HANDOFFS.find((h) => h.id === o.handoff)?.label}</p>
+      )}
+      <label className="photo-input">
+        <Camera size={18} aria-hidden="true" />
+        <span>{photo ? 'Photo added ✓' : 'Take a photo of the box'}</span>
+        <input type="file" accept="image/*" capture="environment" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+      </label>
+      {error && <p className="app-alert app-alert-error">{error}</p>}
+      <button type="button" className="button button-small" disabled={busy} onClick={submit}>
+        <CircleCheck size={16} aria-hidden="true" /> {busy ? 'Saving…' : 'Mark delivered'}
+      </button>
+    </div>
+  )
+}
+
 export default function RiderConsole({ riderId, deliveries }) {
   const router = useRouter()
   const { sharing, info, start, stop } = useLocationSharing(riderId)
@@ -83,11 +181,20 @@ export default function RiderConsole({ riderId, deliveries }) {
     if (hasLive && !sharing) start()
   }, [hasLive]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function update(id, status) {
+  async function pickUp(id) {
     setBusyId(id)
     setError('')
-    if (status === 'out_for_delivery') start()
-    const result = await setRiderStatus(id, status)
+    start()
+    const result = await startDelivery(id)
+    setBusyId(null)
+    if (result.error) setError(result.error)
+    router.refresh()
+  }
+
+  async function missed(id) {
+    if (!window.confirm('Couldn’t deliver this box? The customer keeps the credit and gets a make-up box.')) return
+    setBusyId(id)
+    const result = await markMissed(id)
     setBusyId(null)
     if (result.error) setError(result.error)
     router.refresh()
@@ -119,16 +226,23 @@ export default function RiderConsole({ riderId, deliveries }) {
       <ul className="rider-list">
         {deliveries.map((d) => {
           const o = d.order
-          const closed = d.status === 'delivered'
+          const closed = ['delivered', 'missed'].includes(d.status)
+          const chilled = (d.extras ?? []).filter((x) => x.kind === 'drink' || x.kind === 'sweet')
           return (
             <li key={d.id} className={`app-card rider-card${closed ? ' is-closed' : ''}`}>
               <div className="rider-card-head">
-                <strong>#{o.order_number} · {d.item_name}{d.quantity > 1 ? ` × ${d.quantity}` : ''}</strong>
+                <strong>#{o.order_number} · {d.item_name.replace('Everyday Dabba: ', '')}{d.quantity > 1 ? ` × ${d.quantity}` : ''}</strong>
                 <StatusPill status={d.status} map={DELIVERY_STATUS} />
               </div>
+              <p className="rider-slot">{slotLabel(d.meal, d.slot)}{d.kind === 'makeup' && ' · MAKE-UP'}</p>
               <p className="detail-line"><MapPin size={18} aria-hidden="true" /><span>{o.address_line}{o.address_landmark && <> · near {o.address_landmark}</>}</span></p>
-              <p className="detail-line"><Phone size={18} aria-hidden="true" /><span>{o.customer_name} · {o.customer_phone}</span></p>
-              {o.notes && <p className="app-muted">Note: {o.notes}</p>}
+              <p className="detail-line"><Phone size={18} aria-hidden="true" /><span>{o.customer_name} · {o.customer_phone}{o.delivery_contact && <> · contact {o.delivery_contact}</>}</span></p>
+              {o.handoff && <p className="rider-handoff">If unreachable: {HANDOFFS.find((h) => h.id === o.handoff)?.label}</p>}
+              {o.delivery_note && <p className="app-muted">Note: {o.delivery_note}</p>}
+              {o.allergies?.length > 0 && <p className="ticket-allergy">{allergenTicket(o.allergies).join(' · ')}</p>}
+              {chilled.length > 0 && (
+                <p className="app-muted"><CupSoda size={14} aria-hidden="true" /> From the chiller: {chilled.map((x) => `${x.name}${x.qty > 1 ? ` × ${x.qty}` : ''}`).join(', ')}</p>
+              )}
               {!closed && (
                 <div className="app-actions">
                   <a className="button button-small button-cream" href={`https://www.google.com/maps/dir/?api=1&destination=${o.lat},${o.lng}&travelmode=two-wheeler`} target="_blank" rel="noreferrer">
@@ -138,16 +252,17 @@ export default function RiderConsole({ riderId, deliveries }) {
                     <Phone size={16} aria-hidden="true" /> Call
                   </a>
                   {d.status !== 'out_for_delivery' ? (
-                    <button type="button" className="button button-small" disabled={busyId === d.id} onClick={() => update(d.id, 'out_for_delivery')}>
+                    <button type="button" className="button button-small" disabled={busyId === d.id} onClick={() => pickUp(d.id)}>
                       Picked up, start delivery
                     </button>
                   ) : (
-                    <button type="button" className="button button-small" disabled={busyId === d.id} onClick={() => update(d.id, 'delivered')}>
-                      <CircleCheck size={16} aria-hidden="true" /> Mark delivered
+                    <button type="button" className="app-linkbutton app-danger" disabled={busyId === d.id} onClick={() => missed(d.id)}>
+                      <X size={14} aria-hidden="true" /> Couldn’t deliver
                     </button>
                   )}
                 </div>
               )}
+              {d.status === 'out_for_delivery' && <DeliverPanel delivery={d} onDone={() => router.refresh()} />}
             </li>
           )
         })}

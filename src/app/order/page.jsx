@@ -1,72 +1,109 @@
-import { requireSession } from '../../lib/auth.js'
-import { createAdminClient } from '../../lib/supabase/server.js'
+import { redirect } from 'next/navigation'
+import { connection } from 'next/server'
+import { getSession } from '../../lib/auth.js'
+import { createAdminClient, supabaseConfigured } from '../../lib/supabase/server.js'
 import { DELIVERY_RADIUS_KM, KITCHEN } from '../../lib/config.js'
-import { earliestStartDate, latestStartDate } from '../../lib/dates.js'
 import { MENUS } from '../../lib/catalog.js'
+import { loadClosedDates, loadExtras } from '../../lib/orderData.js'
+import { addDays, todayIST } from '../../lib/dates.js'
+import { MAX_DELIVERY_KM } from '../../lib/rules.js'
 import { bowls } from '../../siteData.js'
-import OrderBuilder from './OrderBuilder.jsx'
+import OrderFlow from './OrderFlow.jsx'
 
 export const metadata = { title: 'Order online | Garam Dibba', robots: { index: false } }
 
-// Site buttons link here as /order?plan=<plan id> or /order?bowl=<bowl slug>
-// so the chosen plan or bowl is already selected.
-function initialChoice({ plan, bowl }) {
-  const menu = Object.values(MENUS).find((m) => m.plans.some((p) => p.id === plan))
+const UUID = /^[0-9a-f-]{36}$/i
+
+// Site buttons link here as /order?plan=<plan id> or /order?bowl=<bowl slug>.
+// "Order again" links use /order?again=<order id> (same meal tomorrow, or renew a plan).
+function initialFromParams({ plan, bowl, menu }) {
+  const fromPlan = Object.values(MENUS).find((m) => m.plans.some((p) => p.id === plan))
   const bowlSlug = bowls.some((b) => b.slug === bowl) ? bowl : ''
-  if (menu) return { menu: menu.id, planId: plan, bowlSlug: menu.id === 'protein_bowl' ? bowlSlug : '' }
-  return { menu: 'protein_bowl', planId: MENUS.protein_bowl.plans[0].id, bowlSlug }
+  const menuId = fromPlan?.id ?? (MENUS[menu] ? menu : bowlSlug ? 'protein_bowl' : null)
+  return {
+    menu: menuId,
+    planId: fromPlan ? plan : null,
+    bowlSlug: menuId === 'protein_bowl' ? bowlSlug : '',
+    fromLink: Boolean(fromPlan || bowlSlug || MENUS[menu]),
+  }
 }
 
 export default async function OrderPage({ searchParams }) {
+  await connection()
+  if (!supabaseConfigured()) redirect('/setup-needed')
   const params = await searchParams
-  const query = new URLSearchParams(
-    Object.entries({ plan: params.plan, bowl: params.bowl }).filter(([, v]) => typeof v === 'string'),
-  ).toString()
-  const { user, profile } = await requireSession(query ? `/order?${query}` : '/order')
+  const session = await getSession()
   const admin = createAdminClient()
+  const [closed, extras] = await Promise.all([loadClosedDates(admin), loadExtras(admin)])
 
-  const { data: lastOrder } = await admin
-    .from('orders')
-    .select('address_line, address_landmark, lat, lng')
-    .eq('user_id', user.id)
-    .neq('status', 'pending_payment')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  const initial = initialFromParams(params)
 
-  let company = null
-  if (profile.company?.active) {
-    const c = profile.company
-    let personalLeft = null
-    if (c.employee_monthly_limit != null) {
-      const { data: spent } = await admin.rpc('company_month_spend', { p_company_id: c.id, p_user_id: user.id })
-      personalLeft = Math.max(0, Number(c.employee_monthly_limit) - Number(spent ?? 0))
+  // Staff land on their own screen: admins handle orders in Kitchen admin, riders see their drops.
+  // They can still order for themselves with /order?as=customer (the "Order" tab in their menu).
+  const staffHome = { admin: '/admin', rider: '/rider' }[session?.profile.role]
+  if (staffHome && params.as !== 'customer' && !initial.fromLink && !params.again) redirect(staffHome)
+
+  // One-tap reorder: same menu, bowl, meal and slot. Single meals repeat tomorrow; plans renew
+  // from the day after the last box.
+  if (session && UUID.test(params.again ?? '')) {
+    const { data: prev } = await admin
+      .from('orders')
+      .select('id, user_id, menu, plan_id, bowl_choice, quantity, meal, slot, weekdays, deliveries(delivery_date)')
+      .eq('id', params.again)
+      .maybeSingle()
+    if (prev && prev.user_id === session.user.id) {
+      const last = prev.deliveries.map((d) => d.delivery_date).sort().at(-1)
+      const crossSell = MENUS[params.menu] && params.menu !== prev.menu
+      const menu = crossSell ? params.menu : prev.menu
+      Object.assign(initial, {
+        menu,
+        planId: crossSell ? MENUS[menu].plans[0].id : prev.plan_id,
+        bowlSlug: crossSell ? '' : prev.bowl_choice ?? '',
+        quantity: prev.quantity,
+        meal: prev.meal ?? 'lunch',
+        slot: prev.slot,
+        weekdays: prev.weekdays,
+        startDate: prev.plan_id.endsWith('1-day') || crossSell ? addDays(todayIST(), 1) : addDays(last ?? todayIST(), 1),
+        again: true,
+        fromLink: true,
+      })
     }
-    company = { name: c.name, personalLeft }
   }
 
+  const p = session?.profile
+  const saved = p
+    ? {
+        email: session.user.email,
+        name: p.full_name ?? '',
+        phone: p.phone ?? '',
+        addressLine: p.address_line ?? '',
+        landmark: p.address_landmark ?? '',
+        point: p.lat != null && p.lng != null ? { lat: p.lat, lng: p.lng } : null,
+        roadKm: p.road_km != null ? Number(p.road_km) : null,
+        deliveryNote: p.delivery_note ?? '',
+        deliveryContact: p.delivery_contact ?? '',
+        allergies: p.allergies ?? [],
+        allergyOther: p.allergy_other ?? '',
+        preferences: p.preferences ?? [],
+        handoff: p.handoff ?? null,
+        isOffice: p.is_office ?? false,
+        receptionOk: p.reception_ok ?? true,
+        defaultMeal: p.default_meal ?? null,
+        defaultSlot: p.default_slot ?? null,
+        company: p.company?.active ? { name: p.company.name } : null,
+      }
+    : null
+
   return (
-    <main className="app-page">
+    <main className="app-page order-page">
       <div className="shell">
-        <header className="app-head">
-          <p className="eyebrow">Order online</p>
-          <h1 className="app-title">Build your dibba</h1>
-          <p className="app-muted">Delivered Monday to Saturday, within {DELIVERY_RADIUS_KM} km of our Dehradun kitchen.</p>
-        </header>
-        <OrderBuilder
+        <OrderFlow
           kitchen={KITCHEN}
-          radiusKm={DELIVERY_RADIUS_KM}
-          earliest={earliestStartDate()}
-          latest={latestStartDate()}
-          company={company}
-          initial={initialChoice(params)}
-          defaults={{
-            name: profile.full_name ?? '',
-            phone: profile.phone ?? '',
-            addressLine: lastOrder?.address_line ?? '',
-            landmark: lastOrder?.address_landmark ?? '',
-            point: lastOrder ? { lat: lastOrder.lat, lng: lastOrder.lng } : null,
-          }}
+          radiusKm={Math.min(DELIVERY_RADIUS_KM, MAX_DELIVERY_KM)}
+          closed={closed}
+          extrasCatalog={extras}
+          saved={saved}
+          initial={initial}
         />
       </div>
     </main>

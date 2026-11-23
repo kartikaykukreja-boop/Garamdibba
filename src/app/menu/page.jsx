@@ -1,3 +1,4 @@
+import CutoffCountdown from '../../components/CutoffCountdown.jsx'
 import Image from 'next/image'
 import { ArrowDown, ArrowRight, CalendarDays } from 'lucide-react'
 import MenuSwitchBar from '../../MenuSwitchBar.jsx'
@@ -75,6 +76,8 @@ export default function MenuPage() {
           homestyle North Indian lunch that changes every day.
         </p>
       </PageHero>
+
+      <div className="shell menu-countdown"><CutoffCountdown /></div>
 
       <div className="menu-switch-zone">
         <MenuSwitchBar />

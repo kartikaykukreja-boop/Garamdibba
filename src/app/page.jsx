@@ -1,3 +1,4 @@
+import CutoffCountdown from '../components/CutoffCountdown.jsx'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -38,6 +39,7 @@ export default function HomePage() {
             vegetarian meals with modern flavours, pick a meal plan that fits your routine, and get
             your food delivered Monday to Saturday.
           </p>
+          <CutoffCountdown className="hero-countdown" />
           <div className="hero-actions">
             <OrderOnlineButton />
             <ButtonLink to="/meal-plans" className="button-cream">View plans</ButtonLink>

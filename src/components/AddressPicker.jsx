@@ -20,7 +20,8 @@ async function reverseGeocode({ lat, lng }) {
   }
 }
 
-export default function AddressPicker({ kitchen, radiusKm, point, onPointChange, onAddressSuggestion }) {
+// hideCheck: the parent shows its own (road-distance) verdict instead of the straight-line one.
+export default function AddressPicker({ kitchen, radiusKm, point, onPointChange, onAddressSuggestion, hideCheck = false }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [status, setStatus] = useState('')
@@ -123,9 +124,9 @@ export default function AddressPicker({ kitchen, radiusKm, point, onPointChange,
         focusKey={focusKey}
         label="Delivery location map. Tap to place your pin."
       />
-      <p className="app-hint">Tap the map or drag the 🏠 pin to your exact door. The dashed circle is our delivery area.</p>
+      <p className="app-hint">Tap the map or drag the 🏠 pin to your exact gate or building. The dashed circle shows roughly where we deliver.</p>
 
-      {point && (
+      {point && !hideCheck && (
         <p className={check.ok ? 'app-alert app-alert-ok' : 'app-alert app-alert-error'} role="status">
           {check.ok
             ? `We deliver here. You’re ${check.distance} km from our kitchen.`

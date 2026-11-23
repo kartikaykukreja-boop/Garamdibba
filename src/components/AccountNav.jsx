@@ -3,7 +3,8 @@ import Link from 'next/link'
 // Tabs shown at the top of every signed-in page. Links depend on the user's roles.
 export default function AccountNav({ profile, active }) {
   const links = [
-    { href: '/order', label: 'Order' },
+    // Staff are sent to their dashboard from /order, so their own orders use ?as=customer.
+    { href: ['admin', 'rider'].includes(profile.role) ? '/order?as=customer' : '/order', label: 'Order' },
     { href: '/orders', label: 'My orders' },
     { href: '/account', label: 'Account' },
   ]

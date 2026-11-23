@@ -6,7 +6,7 @@ export async function completeOrderIfDone(admin, orderId) {
     .from('deliveries')
     .select('id', { count: 'exact', head: true })
     .eq('order_id', orderId)
-    .not('status', 'in', '(delivered,cancelled)')
+    .in('status', ['scheduled', 'preparing', 'out_for_delivery', 'paused'])
   if (count === 0) {
     await admin.from('orders').update({ status: 'completed' }).eq('id', orderId).eq('status', 'confirmed')
   }

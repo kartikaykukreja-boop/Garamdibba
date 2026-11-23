@@ -1,0 +1,300 @@
+/* ---------- Policy pages (refund, delivery, terms, privacy) ---------- */
+
+.policy-hero-inner {
+  padding: 84px 0 64px;
+}
+
+.policy-hero-inner h1 {
+  max-width: 820px;
+  font-size: clamp(2.6rem, 5vw, 4.4rem);
+}
+
+.policy-hero-inner > p {
+  max-width: 620px;
+  margin-bottom: 0;
+  color: rgba(236, 221, 216, 0.83);
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.policy-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 760px) 240px;
+  justify-content: space-between;
+  gap: 60px;
+  padding-top: 64px;
+  padding-bottom: 110px;
+}
+
+.policy-body {
+  min-width: 0;
+  color: rgba(75, 28, 23, 0.86);
+  font-size: 0.98rem;
+  line-height: 1.8;
+}
+
+.policy-body h2 {
+  margin: 0 0 14px;
+  color: var(--ink);
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.policy-body p {
+  margin: 0 0 14px;
+}
+
+.policy-body ul {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding-left: 22px;
+}
+
+.policy-body li::marker {
+  color: var(--red);
+}
+
+.policy-body strong {
+  color: var(--ink);
+}
+
+.policy-updated {
+  color: var(--red);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.policy-summary {
+  margin: 8px 0 44px;
+  padding: 26px 28px 12px;
+  border: 1px solid rgba(143, 33, 23, 0.25);
+  border-left: 5px solid var(--mustard);
+  border-radius: 18px;
+  background: var(--cream);
+}
+
+.policy-summary h2 {
+  font-size: 1.45rem;
+}
+
+.policy-section {
+  padding: 30px 0 18px;
+  border-top: 1px solid rgba(143, 33, 23, 0.2);
+  scroll-margin-top: 110px;
+}
+
+.policy-link {
+  color: var(--red);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.policy-table-wrap {
+  margin: 6px 0 18px;
+  overflow-x: auto;
+  border: 1px solid rgba(143, 33, 23, 0.25);
+  border-radius: 14px;
+  background: #fffaf7;
+}
+
+.policy-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.policy-table th,
+.policy-table td {
+  padding: 12px 16px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.policy-table th {
+  color: var(--cream);
+  background: var(--masala);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.policy-table tbody tr + tr td {
+  border-top: 1px solid rgba(143, 33, 23, 0.15);
+}
+
+.policy-example {
+  margin: 4px 0 18px;
+  padding: 18px 22px 6px;
+  border-radius: 14px;
+  background: rgba(221, 155, 60, 0.16);
+}
+
+.policy-callout {
+  padding: 16px 20px;
+  border-left: 4px solid var(--red);
+  border-radius: 0 12px 12px 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.policy-hinglish {
+  color: var(--red);
+  font-family: 'Kalam', cursive;
+  font-size: 1.1rem;
+}
+
+.policy-contact {
+  margin-top: 30px;
+  padding: 28px;
+  border-radius: 22px;
+  color: var(--cream);
+  background: var(--masala);
+}
+
+.policy-contact h2 {
+  color: var(--cream);
+}
+
+.policy-contact p {
+  color: rgba(236, 221, 216, 0.82);
+}
+
+.policy-contact ul {
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.policy-contact li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.policy-contact svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--mustard);
+}
+
+.policy-contact a {
+  color: var(--cream);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.policy-nav {
+  position: sticky;
+  top: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  align-self: start;
+}
+
+.policy-nav p {
+  margin: 0 0 4px;
+  color: var(--red);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.policy-nav a {
+  color: rgba(75, 28, 23, 0.78);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.policy-nav a:hover,
+.policy-nav a[aria-current='page'] {
+  color: var(--red);
+  font-weight: 700;
+}
+
+/* Footer additions: a fifth "Policies" column and business details */
+.footer-grid {
+  grid-template-columns: 1.4fr repeat(4, 1fr);
+  gap: 48px;
+}
+
+.footer-legal {
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+  color: rgba(236, 221, 216, 0.6);
+  font-size: 0.76rem;
+  font-style: normal;
+  line-height: 1.6;
+}
+
+@media (max-width: 1200px) {
+  .footer-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 980px) {
+  .policy-layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .policy-nav {
+    position: static;
+    order: -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+  }
+
+  .policy-nav p {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .policy-hero-inner {
+    padding: 48px 0 40px;
+  }
+
+  .policy-layout {
+    padding-top: 36px;
+    padding-bottom: 74px;
+  }
+
+  .policy-summary {
+    padding: 20px 20px 8px;
+  }
+
+  .policy-contact {
+    padding: 22px 20px;
+  }
+
+  .policy-table th,
+  .policy-table td {
+    padding: 10px 12px;
+  }
+
+  /* Restate App.css's mobile footer, since the base rule above loads later. */
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}

@@ -4,6 +4,9 @@ export const DELIVERY_STATUS = {
   out_for_delivery: { label: 'Out for delivery', tone: 'live' },
   delivered: { label: 'Delivered', tone: 'ok' },
   cancelled: { label: 'Cancelled', tone: 'muted' },
+  skipped: { label: 'Skipped · credit kept', tone: 'muted' },
+  missed: { label: 'Missed · make-up booked', tone: 'warm' },
+  paused: { label: 'Paused', tone: 'muted' },
 }
 
 export const ORDER_STATUS = {
